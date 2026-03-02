@@ -19,7 +19,7 @@ body{
 
 .panel{
   background:linear-gradient(160deg,#101310 0%,#090b08 100%);
-  border:1px solid #20241a;border-radius:18px;
+  border:1px solid #20241a;border-radius:18px
   padding:1.2rem 1.4rem 1.3rem;
   display:flex;flex-direction:column;align-items:center;gap:0.85re
   position:relative;
@@ -367,10 +367,10 @@ function setShift(d,h){
 
 function obAction(a){
   if(a==='start'){   if(!S.running) startDay(); else if(S.paused) resumeFrokost(); }
-  else if(a==='frokost'){ if(S.running&&!S.paused) startFrokost(); }
-  else if(a==='slut'){   if(S.running) endDay(); }
-  else if(a==='reset'){  reset(); }
-  else if(a==='log'){    showLog(); }
+  else if(a==='frokost') startFrokost();
+  else if(a==='slut')  stopDay();
+  else if(a==='reset') resetDay();
+  else if(a==='log')   showLog();
 }
 
 function setStatus(type,msg){
@@ -382,21 +382,6 @@ function setStatus(type,msg){
   l2.className=l1.className='sb-led '+type;
 }
 
-function startDay(){
-  S.running=true;S.paused=false;S.startTs=Date.now();S.fFired=false;S.bFired=false;S.dFired=false;
-  S.frokostTs=null; S.frokostEndTs=null; S.totalPauseMs=0;
-  document.getElementById('hpLed').className='hp-led on';
-  document.getElementById('obStartLbl').textContent='AKTIV';
-  setStatus('on','ARBEJDSDAGEN ER STARTET!');
-  toast('► ARBEJDSDAGEN ER STARTET!');
-  refreshLabels(Date.now());
-  S.iv=setInterval(tick,50);
-}
-==='frokost') startFrokost();
-  else if(a==='slut')  stopDay();
-  else if(a==='reset') resetDay();
-  else if(a==='log')   showLog();
-}
 
 function startDay(){
   settingsOpen = false;
