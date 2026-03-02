@@ -306,7 +306,7 @@ function resizeCanvas(){
   const instr = document.getElementById('instrument');
   const size = instr.offsetWidth || Math.min(window.innerWidth, window.innerHeight) * 0.85;
   W = H = size;
-  CX = CX = size/2;
+  CX = CY = size/2;
   R = size/2 * 0.9;
   canvas.width = size;
   canvas.height = size;
