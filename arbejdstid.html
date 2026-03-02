@@ -6,11 +6,817 @@
 <title>ARBEJDSTID MK-III</title>
 <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
 <style>
-body { background: #060707; display: flex; align-items: center; justify-content: center; min-height: 100vh; }
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+  background:#060707;
+  background-image:radial-gradient(ellipse 100% 60% at 50% -5%,rgba(0,50,15,0.4) 0%,transparent 65%);
+  min-height:100vh;min-height:100dvh;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:1rem;font-family:'Share Tech Mono',monospace;color:#b8d0a8;
+  touch-action:manipulation;
+  overflow:hidden;
+}
+
+.panel{
+  background:linear-gradient(160deg,#101310 0%,#090b08 100%);
+  border:1px solid #20241a;border-radius:18px;
+  padding:1.2rem 1.4rem 1.3rem;
+  display:flex;flex-direction:column;align-items:center;gap:0.85rem;
+  position:relative;
+  box-shadow:0 0 0 1px #040504,0 40px 100px rgba(0,0,0,0.9),inset 0 1px 0 rgba(255,255,255,0.03);
+  width:100%;max-width:420px;
+}
+.header-plate, .settings-drawer, .status-bar, .legend { display:none; }
+
+/* Rivets */
+.rv{position:absolute;width:7px;height:7px;border-radius:50%;
+  background:radial-gradient(circle at 35% 30%,#2e3228,#111410);
+  box-shadow:inset 0 1px 3px rgba(0,0,0,0.95),0 1px 0 rgba(255,255,255,0.035);}
+.rv.p1{top:9px;left:9px}.rv.p2{top:9px;right:9px}
+.rv.p3{bottom:9px;left:9px}.rv.p4{bottom:9px;right:9px}
+
+/* Header */
+.header-plate{
+  display:flex;align-items:center;justify-content:space-between;
+  width:100%;max-width:380px;
+  background:#090b08;border:1px solid #1a1e14;border-radius:6px;padding:0.32rem 0.8rem;
+  cursor:pointer;user-select:none;
+}
+.hp-title{font-family:'Orbitron',monospace;font-weight:900;font-size:0.55rem;letter-spacing:0.4em;color:#2a3220;text-transform:uppercase}
+.hp-right{display:flex;align-items:center;gap:0.5rem}
+.hp-led{width:5px;height:5px;border-radius:50%;background:#1a1e14;transition:all 0.3s}
+.hp-led.on{background:#00ff55;box-shadow:0 0 6px #00ff55}
+.hp-led.warn{background:#ffcc00;box-shadow:0 0 6px #ffcc00;animation:blink 0.7s infinite}
+.hp-ser{font-size:0.44rem;letter-spacing:0.2em;color:#222818}
+.hp-gear{font-size:0.7rem;color:#2a3220;transition:color 0.2s}
+.header-plate:hover .hp-gear{color:#b8d0a8}
+
+/* Settings drawer */
+.settings-drawer{
+  width:100%;max-width:380px;
+  overflow:hidden;
+  max-height:0;
+  transition:max-height 0.35s cubic-bezier(0.4,0,0.2,1), opacity 0.25s;
+  opacity:0;
+}
+.settings-drawer.open{
+  max-height:120px;
+  opacity:1;
+}
+.settings-inner{
+  display:flex;flex-direction:column;gap:0.5rem;
+  padding:0.5rem 0 0.2rem;
+}
+
+/* Shift */
+.shift-row{display:flex;align-items:center;gap:0.6rem}
+.shift-tag{font-size:0.48rem;letter-spacing:0.18em;color:#3a4430;text-transform:uppercase}
+.shift-sel{display:flex;gap:0;border:1px solid #1c2016;border-radius:5px;overflow:hidden}
+.sbt{padding:0.32rem 0.8rem;background:#0e1009;color:#2e3828;font-family:'Orbitron',monospace;
+  font-size:0.6rem;font-weight:700;letter-spacing:0.05em;border:none;cursor:pointer;
+  border-right:1px solid #1c2016;}
+.sbt:last-child{border-right:none}
+.sbt.on{background:#0c1a10;color:#00ff55;text-shadow:0 0 10px rgba(0,255,85,0.7)}
+
+/* Instrument wrap */
+.instrument-wrap{position:relative;display:flex;align-items:center;justify-content:center}
+
+/* Responsive instrument size */
+.instrument-wrap{width:min(360px, calc(100vw - 3rem));height:min(360px, calc(100vw - 3rem))}
+
+/* 5 outer buttons */
+.obutton{
+  position:absolute;
+  width:min(54px, 14vw);height:min(54px, 14vw);
+  border-radius:50%;
+  background:radial-gradient(circle at 40% 30%,#222820,#0e110c);
+  border:2px solid #2a2e22;color:#3a4430;
+  font-family:'Orbitron',monospace;font-size:min(0.44rem, 1.6vw);font-weight:700;
+  cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  text-transform:uppercase;line-height:1.3;
+  box-shadow:0 4px 12px rgba(0,0,0,0.85),inset 0 1px 0 rgba(255,255,255,0.04);
+  transition:all 0.12s;user-select:none;
+  -webkit-tap-highlight-color:transparent;
+}
+.obutton:hover{border-color:#3a3e30;color:#b8d0a8}
+.obutton:active{transform:scale(0.85);box-shadow:0 2px 6px rgba(0,0,0,0.9),inset 0 2px 4px rgba(0,0,0,0.5)}
+.ob-green{background:radial-gradient(circle at 40% 30%,#00cc44,#007722);border-color:#00ff55;color:#001a08;box-shadow:0 0 20px rgba(0,255,85,0.5),0 4px 12px rgba(0,0,0,0.8);text-shadow:none}
+.ob-yellow{background:radial-gradient(circle at 40% 30%,#ffdd00,#cc9900);border-color:#ffee44;color:#1a0f00;box-shadow:0 0 20px rgba(255,220,0,0.5),0 4px 12px rgba(0,0,0,0.8)}
+.ob-cyan{border-color:#22ccff;color:#22ccff;box-shadow:0 0 16px rgba(34,204,255,0.3),0 4px 12px rgba(0,0,0,0.8)}
+.ob-red{background:radial-gradient(circle at 40% 30%,#cc2200,#880000);border-color:#ff4422;color:#fff0ee;box-shadow:0 0 20px rgba(255,50,30,0.5),0 4px 12px rgba(0,0,0,0.8)}
+.ob-icon{font-size:min(1.1rem, 3.8vw);line-height:1}
+.ob-lbl{font-size:min(0.38rem, 1.35vw);letter-spacing:0.04em;margin-top:2px}
+.ob-top{top:0;left:50%;transform:translateX(-50%)}
+.ob-tr{top:18%;right:0}
+.ob-br{bottom:18%;right:0}
+.ob-bl{bottom:18%;left:0}
+.ob-tl{top:18%;left:0}
+
+/* Instrument face */
+.instrument{position:relative;width:min(280px,74vw);height:min(280px,74vw)}
+.bezel-ring{
+  position:absolute;inset:-16px;border-radius:50%;
+  background:radial-gradient(circle,#1e211a 60%,#101210 100%);
+  box-shadow:inset 0 2px 8px rgba(0,0,0,0.95),0 0 0 2px #080908,0 0 0 4px #1a1d14,0 0 0 6px #080908,0 8px 30px rgba(0,0,0,0.9);
+  z-index:0;
+}
+.knurl-ring{
+  position:absolute;inset:-12px;border-radius:50%;
+  background:repeating-conic-gradient(#1e211a 0deg 3deg,#0e1009 3deg 6deg);
+  opacity:0.65;z-index:0;
+}
+canvas{position:absolute;top:0;left:0;width:100%;height:100%;border-radius:50%;z-index:1}
+
+/* Face labels */
+.face-labels{position:absolute;top:0;left:0;width:100%;height:100%;z-index:2}
+.flabel{
+  position:absolute;transform:translate(-50%,-50%);
+  text-align:center;cursor:pointer;pointer-events:all;user-select:none;
+  transition:filter 0.15s;
+}
+.flabel:hover{filter:brightness(1.6)}
+.flabel:active{filter:brightness(2)}
+.fv{font-family:'Orbitron',monospace;font-size:min(0.78rem,2.5vw);font-weight:900;line-height:1}
+.fl{font-size:min(0.34rem,1.1vw);letter-spacing:0.14em;text-transform:uppercase;opacity:0.65;margin-top:2px}
+.fm{font-size:min(0.3rem,1vw);letter-spacing:0.08em;opacity:0.4;margin-top:1px}
+
+/* Colour states */
+.grn .fv{color:#00ff55;text-shadow:0 0 14px rgba(0,255,85,0.9),0 0 30px rgba(0,255,85,0.3)}
+.grn .fl{color:#00ff55}.grn .fm{color:#00ff55}
+.yel .fv{color:#ffcc00;text-shadow:0 0 14px rgba(255,200,0,0.9)}
+.yel .fl{color:#ffcc00}.yel .fm{color:#ffcc00}
+.red .fv{color:#ff2828;text-shadow:0 0 14px rgba(255,40,40,0.9)}
+.red .fl{color:#ff2828}.red .fm{color:#ff2828}
+.blu .fv{color:#22ccff;text-shadow:0 0 14px rgba(34,204,255,0.8)}
+.blu .fl{color:#22ccff}
+.dim .fv{color:#1c2016}.dim .fl{color:#1c2016}.dim .fm{color:#1c2016}
+
+@keyframes flashIn{0%{opacity:0;filter:brightness(5)}50%{opacity:1;filter:brightness(2)}100%{opacity:1;filter:brightness(1)}}
+.flash{animation:flashIn 0.8s ease both}
+
+/* Status bar */
+.status-bar{
+  width:100%;max-width:340px;background:#080a07;border:1px solid #1a1e14;
+  border-radius:5px;padding:0.3rem 0.75rem;
+  display:flex;align-items:center;justify-content:space-between;gap:0.5rem;
+}
+.sb-led{width:5px;height:5px;border-radius:50%;background:#141810;transition:all 0.3s;flex-shrink:0}
+.sb-led.on{background:#00ff55;box-shadow:0 0 7px #00ff55}
+.sb-led.warn{background:#ffcc00;box-shadow:0 0 7px #ffcc00;animation:blink 0.7s infinite}
+.sb-led.done{background:#22ccff;box-shadow:0 0 7px #22ccff}
+.sb-txt{font-size:0.56rem;letter-spacing:0.2em;color:#2e3828;text-transform:uppercase;flex:1;text-align:center}
+.sb-txt.on{color:#00ff55;text-shadow:0 0 8px rgba(0,255,85,0.4)}
+.sb-txt.warn{color:#ffcc00}
+.sb-txt.done{color:#22ccff}
+
+/* Legend */
+.legend{display:flex;gap:0.75rem;align-items:center;font-size:0.52rem;color:#3a4430;letter-spacing:0.07em}
+.ld{width:16px;height:3.5px;border-radius:2px;display:inline-block;margin-right:0.3rem;vertical-align:middle}
+.li{display:flex;align-items:center}
+
+/* Toast */
+.toast{
+  position:fixed;bottom:1.2rem;left:50%;transform:translateX(-50%) translateY(80px);
+  background:#080a07;border:1px solid #0a4820;color:#00ff55;
+  font-family:'Orbitron',monospace;font-size:0.6rem;letter-spacing:0.14em;
+  padding:0.55rem 1.2rem;border-radius:5px;
+  transition:transform 0.4s cubic-bezier(0.34,1.56,0.64,1);z-index:100;
+  white-space:nowrap;
+}
+.toast.show{transform:translateX(-50%) translateY(0)}
+
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0.25}}
 </style>
 </head>
 <body>
-<h1>ARBEJDSTID MK-III</h1>
-<p>Work time tracking application</p>
+<div class="panel">
+  <div class="rv p1"></div><div class="rv p2"></div>
+  <div class="rv p3"></div><div class="rv p4"></div>
+
+  <!-- Header — tap to open settings -->
+  <div class="header-plate" onclick="toggleSettings()" id="headerPlate">
+    <div class="hp-title">ARBEJDSTID MK-III</div>
+    <div class="hp-right">
+      <div class="hp-led" id="hpLed"></div>
+      <div class="hp-ser">SN-2024-DK</div>
+      <div class="hp-gear" id="hpGear">⚙</div>
+    </div>
+  </div>
+
+  <!-- Settings drawer (hidden by default) -->
+  <div class="settings-drawer" id="settingsDrawer">
+    <div class="settings-inner">
+      <div class="shift-row">
+        <span class="shift-tag">VAGT</span>
+        <div class="shift-sel">
+          <button class="sbt on" id="s5" onclick="setShift(5,8)">5×8T</button>
+          <button class="sbt" id="s4" onclick="setShift(4,10)">4×10T</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="instrument-wrap" id="instrumentWrap">
+    <!-- TOP: Start/Aktiv -->
+    <button class="obutton ob-top ob-green" id="obStart" onclick="obAction('start')">
+      <span class="ob-icon">▶</span><span class="ob-lbl" id="obStartLbl">START</span>
+    </button>
+    <!-- TR: Frokostpause -->
+    <button class="obutton ob-tr ob-yellow" id="obFrokost" onclick="obAction('frokost')">
+      <span class="ob-icon">☕</span><span class="ob-lbl" id="obFrokostLbl">FROKOST</span>
+    </button>
+    <!-- BR: Slut på dagen -->
+    <button class="obutton ob-br ob-red" id="obSlut" onclick="obAction('slut')">
+      <span class="ob-icon">⏹</span><span class="ob-lbl">SLUT</span>
+    </button>
+    <!-- BL: Reset -->
+    <button class="obutton ob-bl" onclick="obAction('reset')">
+      <span class="ob-icon">↺</span><span class="ob-lbl">RESET</span>
+    </button>
+    <!-- TL: Rapport/log -->
+    <button class="obutton ob-tl" onclick="obAction('log')">
+      <span class="ob-icon">📊</span><span class="ob-lbl">DATA</span>
+    </button>
+
+    <div class="instrument" id="instrument">
+      <div class="bezel-ring"></div>
+      <div class="knurl-ring"></div>
+      <canvas id="c"></canvas>
+
+      <div class="face-labels" id="faceLabels">
+        <div class="flabel blu" id="flN" style="left:50%;top:50%">
+          <div class="fv" id="flNv" style="font-size:min(1.2rem,4.2vw)">--:--</div>
+          <div class="fl">NU</div>
+        </div>
+        <div class="flabel grn dim" id="flW" onclick="toggleLabel('work')">
+          <div class="fv" id="flWv">--:--</div>
+          <div class="fl" id="flWl">ARBEJDET</div>
+          <div class="fm" id="flWm">TAP</div>
+        </div>
+        <div class="flabel yel dim" id="flP" onclick="toggleLabel('pause')">
+          <div class="fv" id="flPv">--:--</div>
+          <div class="fl" id="flPl">PAUSE OM</div>
+          <div class="fm" id="flPm">TAP</div>
+        </div>
+        <div class="flabel red dim" id="flE" onclick="toggleLabel('end')">
+          <div class="fv" id="flEv">--:--</div>
+          <div class="fl" id="flEl">SLUT OM</div>
+          <div class="fm" id="flEm">TAP</div>
+        </div>
+        <div class="flabel grn dim" id="flS">
+          <div class="fv" id="flSv">--:--</div>
+          <div class="fl">START</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="status-bar">
+    <div class="sb-led" id="sbL1"></div>
+    <div class="sb-txt" id="sbTxt">TRYK START</div>
+    <div class="sb-led" id="sbL2"></div>
+  </div>
+
+  <div class="legend">
+    <div class="li"><span class="ld" style="background:linear-gradient(90deg,#003010,#00ff55)"></span>Arbejdstid</div>
+    <div class="li"><span class="ld" style="background:#ffcc00"></span>Frokostvind.</div>
+    <div class="li"><span class="ld" style="background:#22ccff"></span>Frokost</div>
+    <div class="li"><span class="ld" style="background:#ff2828"></span>Sluttid</div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+// ── Settings toggle ──
+let settingsOpen = false;
+function toggleSettings(){
+  if(S.running) return; // don't allow settings while running
+  settingsOpen = !settingsOpen;
+  document.getElementById('settingsDrawer').classList.toggle('open', settingsOpen);
+  document.getElementById('hpGear').textContent = settingsOpen ? '✕' : '⚙';
+}
+
+// ── Responsive canvas sizing ──
+let W, H, CX, CY, R;
+const canvas = document.getElementById('c');
+const ctx = canvas.getContext('2d');
+const PI2 = Math.PI*2, hPI = Math.PI/2;
+
+function resizeCanvas(){
+  const instr = document.getElementById('instrument');
+  const size = instr.offsetWidth || Math.min(window.innerWidth, window.innerHeight) * 0.85;
+  W = H = size;
+  CX = CX = size/2;
+  R = size/2 * 0.9;
+  canvas.width = size;
+  canvas.height = size;
+}
+
+// ── Auto time — use device clock directly ──
+function nowSec(){
+  const d = new Date();
+  return d.getHours()*3600 + d.getMinutes()*60 + d.getSeconds();
+}
+
+function localParts(ts){
+  const d = new Date(ts);
+  return {
+    h: d.getHours(),
+    m: d.getMinutes(),
+    s: d.getSeconds(),
+    ms: d.getMilliseconds()
+  };
+}
+
+const pad = n => String(Math.floor(n)).padStart(2,'0');
+function fmtClock(ts){ const p=localParts(ts); return pad(p.h)+':'+pad(p.m); }
+function fmtDur(ms){
+  if(ms<=0) return '0:00';
+  const h=Math.floor(ms/3600000), m=Math.floor((ms%3600000)/60000);
+  return h>0 ? h+':'+pad(m) : '0:'+pad(m);
+}
+function tsAng(ts){
+  const p=localParts(ts);
+  return ((p.h%12)*3600+p.m*60+p.s)/43200*PI2-hPI;
+}
+
+// ── App state ──
+let S = {
+  running:false, paused:false,
+  startTs:null, pauseStart:null, totalPauseMs:0,
+  frokostTs:null,       // when frokost pause was actually taken
+  frokostEndTs:null,    // when frokost was resumed
+  workHours:8, shiftDays:5,
+  iv:null, bFired:false, dFired:false, phase:0
+};
+
+let showTime = {work:false, pause:false, end:false};
+
+function toggleLabel(key){
+  if(!S.running) return;
+  showTime[key] = !showTime[key];
+  refreshLabels(Date.now());
+}
+
+function setShift(d,h){
+  if(S.running) return;
+  S.shiftDays=d; S.workHours=h;
+  document.getElementById('s4').classList.toggle('on',d===4);
+  document.getElementById('s5').classList.toggle('on',d===5);
+}
+
+function obAction(a){
+  if(a==='start'){   if(!S.running) startDay(); else if(S.paused) resumeFrokost(); }
+  else if(a==='frokost'){ if(S.running&&!S.paused) startFrokost(); }
+  else if(a==='slut'){   if(S.running) endDay(); }
+  else if(a==='reset'){  reset(); }
+  else if(a==='log'){    showLog(); }
+}
+
+function setStatus(type,msg){
+  const e=document.getElementById('sbTxt');
+  const l1=document.getElementById('sbL1');
+  const l2=document.getElementById('sbL2');
+  e.className='sb-txt '+type;
+  e.textContent=msg;
+  l2.className=l1.className='sb-led '+type;
+}
+
+function startDay(){
+  S.running=true;S.paused=false;S.startTs=Date.now();S.fFired=false;S.bFired=false;S.dFired=false;
+  S.frokostTs=null; S.frokostEndTs=null; S.totalPauseMs=0;
+  document.getElementById('hpLed').className='hp-led on';
+  document.getElementById('obStartLbl').textContent='AKTIV';
+  setStatus('on','ARBEJDSDAGEN ER STARTET!');
+  toast('► ARBEJDSDAGEN ER STARTET!');
+  refreshLabels(Date.now());
+  S.iv=setInterval(tick,50);
+}
+==='frokost') startFrokost();
+  else if(a==='slut')  stopDay();
+  else if(a==='reset') resetDay();
+  else if(a==='log')   showLog();
+}
+
+function startDay(){
+  settingsOpen = false;
+  document.getElementById('settingsDrawer').classList.remove('open');
+  document.getElementById('hpGear').textContent = '⚙';
+
+  S.startTs=Date.now(); S.running=true; S.paused=false;
+  S.frokostTs=null; S.frokostEndTs=null;
+  S.bFired=false; S.dFired=false; S.phase=0; S.totalPauseMs=0;
+  showTime={work:false,pause:false,end:false};
+  document.getElementById('obStartLbl').textContent='AKTIV';
+  // Keep ob-green — button stays green while running
+  document.getElementById('hpLed').classList.add('on');
+  document.getElementById('flSv').textContent = fmtClock(S.startTs);
+  activateAll();
+  setStatus('on', S.workHours+'T VAGT — '+S.shiftDays+' DAGE');
+  toast('▶ ARBEJDSDAG STARTET');
+  S.iv=setInterval(tick,50);
+}
+
+function startFrokost(){
+  if(!S.running || S.paused) return;
+  if(S.frokostTs){ toast('FROKOST ALLEREDE REGISTRERET'); return; }
+  S.paused=true; S.pauseStart=Date.now();
+  S.frokostTs=Date.now();
+  document.getElementById('obFrokost').classList.add('ob-cyan');
+  document.getElementById('obFrokostLbl').textContent='TILBAGE';
+  document.getElementById('obStart').classList.add('ob-cyan');
+  document.getElementById('obStartLbl').textContent='TILBAGE';
+  document.getElementById('hpLed').classList.remove('on');
+  document.getElementById('hpLed').classList.add('warn');
+  setStatus('warn','FROKOSTPAUSE — 45 MIN');
+  toast('☕ FROKOSTPAUSE STARTET');
+}
+
+function resumeFrokost(){
+  if(!S.paused) return;
+  S.totalPauseMs+=Date.now()-S.pauseStart;
+  S.frokostEndTs=Date.now();
+  S.paused=false; S.pauseStart=null;
+  document.getElementById('obFrokost').classList.remove('ob-cyan');
+  document.getElementById('obFrokostLbl').textContent='FROKOST';
+  document.getElementById('obStart').classList.remove('ob-cyan');
+  document.getElementById('obStartLbl').textContent='AKTIV';
+  document.getElementById('hpLed').classList.remove('warn');
+  document.getElementById('hpLed').classList.add('on');
+  setStatus('on', S.workHours+'T VAGT — '+S.shiftDays+' DAGE');
+  toast('▶ FROKOST SLUT — GOD ARBEJDSLYST');
+}
+
+function stopDay(){
+  if(!S.running) return;
+  clearInterval(S.iv); S.running=false; S.paused=false;
+  document.getElementById('obStartLbl').textContent='START';
+  document.getElementById('obStart').classList.remove('ob-cyan');
+  document.getElementById('obFrokost').classList.remove('ob-cyan');
+  document.getElementById('obFrokostLbl').textContent='FROKOST';
+  document.getElementById('hpLed').className='hp-led';
+  ['flW','flP','flE','flS'].forEach(id=>document.getElementById(id).classList.add('dim'));
+  setStatus('','ARBEJDSDAGEN AFSLUTTET');
+  toast('⏹ SLUT PÅ DAGEN');
+}
+
+function resetDay(){
+  stopDay();
+  S.startTs=null; S.totalPauseMs=0; S.frokostTs=null; S.frokostEndTs=null;
+  ['flWv','flPv','flEv','flSv'].forEach(id=>document.getElementById(id).textContent='--:--');
+  document.getElementById('flNv').textContent='--:--';
+  setStatus('','TRYK START');
+  toast('↺ NULSTILLET');
+}
+
+function showLog(){
+  if(!S.startTs){toast('INGEN SESSION');return;}
+  const endTs=S.startTs+S.workHours*3600000+30*60000+S.totalPauseMs;
+  const frokostInfo = S.frokostTs
+    ? ' · FROKOST '+fmtClock(S.frokostTs)+(S.frokostEndTs?' ('+fmtDur(S.frokostEndTs-S.frokostTs)+')':'  aktiv')
+    : ' · INGEN FROKOST';
+  toast('START '+fmtClock(S.startTs)+frokostInfo+' · SLUT '+fmtClock(endTs));
+}
+
+function activateAll(){
+  ['flW','flP','flE','flN','flS'].forEach(id=>{
+    const el=document.getElementById(id);
+    el.classList.remove('dim');
+    el.classList.add('flash');
+    setTimeout(()=>el.classList.remove('flash'),900);
+  });
+}
+
+function refreshLabels(now){
+  if(!S.startTs) return;
+  const instrSize = document.getElementById('instrument').offsetWidth;
+  const scale = instrSize / 280; // scale factor relative to original 280px design
+
+  const workMs=S.workHours*3600000, mandMs=30*60000;
+  const pauseMs=S.paused?(S.totalPauseMs+(now-S.pauseStart)):S.totalPauseMs;
+  const endTs=S.startTs+workMs+mandMs+pauseMs;
+  const elapsed=now-S.startTs-pauseMs;
+  const remain=endTs-now;
+  const pLatestTs=S.startTs+5*3600000+pauseMs;
+  const pauseRemain=pLatestTs-now;
+
+  document.getElementById('flNv').textContent = fmtClock(now);
+
+  if(!showTime.work){
+    document.getElementById('flWv').textContent = fmtDur(Math.max(0,elapsed));
+    document.getElementById('flWl').textContent = 'ARBEJDET';
+    document.getElementById('flWm').textContent = '→ KL.';
+  } else {
+    document.getElementById('flWv').textContent = fmtClock(endTs);
+    document.getElementById('flWl').textContent = 'SLUT KL.';
+    document.getElementById('flWm').textContent = '→ TID';
+  }
+
+  const pEl = document.getElementById('flP');
+  if(S.frokostTs && S.paused){
+    // Frokost aktiv — vis 45-min nedtælling
+    const frokostRemain = (S.frokostTs+45*60000) - now;
+    document.getElementById('flPv').textContent = frokostRemain>0 ? fmtDur(frokostRemain) : 'TILBAGE!';
+    document.getElementById('flPl').textContent = 'FROKOST';
+    document.getElementById('flPm').textContent = frokostRemain>0 ? 'TILBAGE' : '→ GÅ NU';
+    pEl.className = 'flabel blu';
+  } else if(S.frokostTs && !S.paused){
+    // Frokost afholdt
+    const frokostDur = (S.frokostEndTs||now) - S.frokostTs;
+    document.getElementById('flPv').textContent = fmtDur(frokostDur);
+    document.getElementById('flPl').textContent = 'FROKOST ✓';
+    document.getElementById('flPm').textContent = '';
+    pEl.className = 'flabel blu';
+  } else if(!showTime.pause){
+    // Vis pause-vindue (3-5t)
+    const pEarliestTs=S.startTs+3*3600000+pauseMs;
+    const toEarliest = pEarliestTs - now;
+    document.getElementById('flPv').textContent = toEarliest>0 ? fmtDur(toEarliest) : (pauseRemain>0?fmtDur(pauseRemain):'TAG NU');
+    document.getElementById('flPl').textContent = toEarliest>0 ? 'FROKOST OM' : 'FROKOST NU';
+    document.getElementById('flPm').textContent = '→ KL.';
+    pEl.className = 'flabel '+(pauseRemain<=0?'red':'yel');
+  } else {
+    document.getElementById('flPv').textContent = fmtClock(pLatestTs);
+    document.getElementById('flPl').textContent = 'SENEST KL.';
+    document.getElementById('flPm').textContent = '→ TID';
+    pEl.className = 'flabel '+(pauseRemain<=0?'red':'yel');
+  }
+
+  if(!showTime.end){
+    document.getElementById('flEv').textContent = remain>0 ? fmtDur(remain) : 'DONE';
+    document.getElementById('flEl').textContent = 'SLUT OM';
+    document.getElementById('flEm').textContent = '→ KL.';
+  } else {
+    document.getElementById('flEv').textContent = fmtClock(endTs);
+    document.getElementById('flEl').textContent = 'SLUT KL.';
+    document.getElementById('flEm').textContent = '→ TID';
+  }
+}
+
+function setStatus(cls,txt){
+  document.getElementById('sbTxt').textContent=txt;
+  document.getElementById('sbTxt').className='sb-txt'+(cls?' '+cls:'');
+  document.getElementById('sbL1').className='sb-led'+(cls?' '+cls:'');
+  document.getElementById('sbL2').className='sb-led'+(cls?' '+cls:'');
+}
+
+function setLabelPos(id, angle, rPct){
+  const el=document.getElementById(id);
+  if(!el) return;
+  el.style.left = (50 + Math.cos(angle)*rPct)+'%';
+  el.style.top  = (50 + Math.sin(angle)*rPct)+'%';
+}
+
+// ── DRAW ──
+function draw(){
+  ctx.setTransform(1,0,0,1,0,0);
+  ctx.shadowBlur=0; ctx.shadowColor='transparent'; ctx.globalAlpha=1;
+  ctx.clearRect(0,0,W,H);
+
+  ctx.beginPath(); ctx.arc(CX,CY,R,0,PI2);
+  ctx.fillStyle='#050505'; ctx.fill();
+
+  const sh=ctx.createRadialGradient(CX,CY,0,CX,CY,R);
+  sh.addColorStop(0,'rgba(255,255,255,0.025)');sh.addColorStop(1,'rgba(0,0,0,0.4)');
+  ctx.beginPath(); ctx.arc(CX,CY,R,0,PI2); ctx.fillStyle=sh; ctx.fill();
+
+  // ── OUTER ARC RING — lives OUTSIDE the clock face (between R and canvas edge) ──
+  // CX = W/2 = canvas half-size. R = CX*0.9 (clock face radius).
+  // Outer ring sits between R and canvas edge (CX), clearly outside the face.
+  const OUR = CX * 0.955; // center of outer ring  (≈ R*1.061)
+  const OUW = CX * 0.075; // ring band width — nicely visible
+
+  if(S.startTs){
+    const now=Date.now();
+    const workMs=S.workHours*3600000, mandMs=30*60000;
+    const pauseMs=S.paused?(S.totalPauseMs+(now-S.pauseStart)):S.totalPauseMs;
+    const endTs=S.startTs+workMs+mandMs+pauseMs;
+    const startA=tsAng(S.startTs);
+    let endAdj=tsAng(endTs); if(endAdj<=startA) endAdj+=PI2;
+    let nowAdj=tsAng(now);   if(nowAdj<=startA)  nowAdj+=PI2;
+    const clampedNow=Math.min(nowAdj,endAdj);
+    const pct=Math.min(1,Math.max(0,(now-S.startTs-pauseMs)/(workMs+mandMs)));
+    const running=S.running&&!S.paused;
+    const pulse=running?(Math.sin(S.phase)*0.5+0.5):0;
+
+    // Dark background track — full 360° to hide knurl behind ring
+    ctx.save();
+    ctx.beginPath(); ctx.arc(CX,CY,OUR,0,PI2);
+    ctx.strokeStyle='rgba(5,8,5,0.92)';
+    ctx.lineWidth=OUW+4;
+    ctx.stroke(); ctx.restore();
+
+    // Ghost track — full working period
+    ctx.save();
+    ctx.beginPath(); ctx.arc(CX,CY,OUR,startA,endAdj);
+    ctx.strokeStyle='rgba(0,180,60,0.38)';
+    ctx.lineWidth=OUW;
+    ctx.stroke(); ctx.restore();
+
+    // GREEN elapsed arc
+    if(pct>0.001){
+      const span=clampedNow-startA;
+      if(span>0.005){
+        // Outer glow
+        ctx.save();
+        ctx.beginPath(); ctx.arc(CX,CY,OUR,startA,clampedNow);
+        ctx.strokeStyle=`rgba(0,255,80,${0.35+pulse*0.12})`;
+        ctx.lineWidth=OUW+CX*0.03; ctx.stroke(); ctx.restore();
+        // Core gradient dim→bright
+        for(let i=0;i<50;i++){
+          const t=(i+1)/50;
+          ctx.save();
+          ctx.beginPath(); ctx.arc(CX,CY,OUR,startA+span*(i/50),startA+span*t);
+          ctx.strokeStyle=`rgba(0,${Math.round(100+t*155)},15,${0.55+t*0.45})`;
+          ctx.lineWidth=OUW;
+          ctx.shadowColor='#00ff55'; ctx.shadowBlur=running?(4+t*14+pulse*6):t*6;
+          ctx.stroke(); ctx.shadowBlur=0; ctx.restore();
+        }
+        // Leading edge pulse
+        if(running){
+          ctx.save();
+          ctx.beginPath(); ctx.arc(CX,CY,OUR,clampedNow-0.04,clampedNow+0.01);
+          ctx.strokeStyle=`rgba(180,255,200,${0.9+pulse*0.1})`;
+          ctx.lineWidth=OUW+CX*0.02; ctx.lineCap='round';
+          ctx.shadowColor='#00ff55'; ctx.shadowBlur=20+pulse*10;
+          ctx.stroke(); ctx.shadowBlur=0; ctx.restore();
+        }
+      }
+    }
+
+    // YELLOW pause window — 3h to 5h after start (WHEN pause can be taken)
+    const pEarliestTs=S.startTs+3*3600000+pauseMs;
+    const pLatestTs=S.startTs+5*3600000+pauseMs;
+    const psa=tsAng(pEarliestTs);
+    let pLatestA=tsAng(pLatestTs); if(pLatestA<=psa) pLatestA+=PI2;
+    const windowOverdue=(now>pLatestTs)&&S.running&&!S.frokostTs;
+    const yHex=windowOverdue?'#ff3333':'#ffdd00';
+    if(!S.frokostTs){
+      // Only show yellow window if frokost not yet taken
+      ctx.save();
+      ctx.beginPath(); ctx.arc(CX,CY,OUR,psa,pLatestA);
+      ctx.strokeStyle=windowOverdue?`rgba(255,50,50,${0.35+pulse*0.1})`:`rgba(255,220,0,${0.35+pulse*0.1})`;
+      ctx.lineWidth=OUW+CX*0.024; ctx.stroke(); ctx.restore();
+      ctx.save();
+      ctx.beginPath(); ctx.arc(CX,CY,OUR,psa,pLatestA);
+      ctx.strokeStyle=yHex; ctx.lineWidth=OUW;
+      ctx.shadowColor=yHex; ctx.shadowBlur=running?(18+pulse*8):10;
+      ctx.stroke(); ctx.shadowBlur=0; ctx.restore();
+    }
+
+    // CYAN frokost block — shown when pause button was actually pressed
+    if(S.frokostTs){
+      const frokostEndTs=S.frokostTs+45*60000;
+      const fsa=tsAng(S.frokostTs);
+      let feAdj=tsAng(frokostEndTs); if(feAdj<=fsa) feAdj+=PI2;
+      // Glow
+      ctx.save();
+      ctx.beginPath(); ctx.arc(CX,CY,OUR,fsa,feAdj);
+      ctx.strokeStyle=`rgba(34,204,255,${0.35+pulse*0.1})`;
+      ctx.lineWidth=OUW+CX*0.024; ctx.stroke(); ctx.restore();
+      // Core
+      ctx.save();
+      ctx.beginPath(); ctx.arc(CX,CY,OUR,fsa,feAdj);
+      ctx.strokeStyle='#22ccff'; ctx.lineWidth=OUW;
+      ctx.shadowColor='#22ccff'; ctx.shadowBlur=S.paused?(20+pulse*10):12;
+      ctx.stroke(); ctx.shadowBlur=0; ctx.restore();
+    }
+
+    // RED end glow band
+    const rA=endAdj, rHalf=0.08;
+    ctx.save();
+    ctx.beginPath(); ctx.arc(CX,CY,OUR,rA-rHalf*1.6,rA+rHalf*1.6);
+    ctx.strokeStyle=`rgba(255,20,20,${0.4+pulse*0.15})`;
+    ctx.lineWidth=OUW+CX*0.032; ctx.stroke(); ctx.restore();
+    ctx.save();
+    ctx.beginPath(); ctx.arc(CX,CY,OUR,rA-rHalf,rA+rHalf);
+    ctx.strokeStyle='#ff1111'; ctx.lineWidth=OUW;
+    ctx.shadowColor='#ff0000'; ctx.shadowBlur=running?(28+pulse*12):18;
+    ctx.stroke(); ctx.shadowBlur=0; ctx.restore();
+
+    // Triangles sit IN the outer ring — tip at outer edge, base inward
+    const triH = OUW * 0.85; // triangle height = ring width
+    const triW = OUW * 0.6;  // triangle half-width
+
+    // RED end triangle
+    ctx.save(); ctx.translate(CX,CY); ctx.rotate(rA);
+    ctx.beginPath();
+    ctx.moveTo(OUR+OUW*0.5,0); ctx.lineTo(OUR-OUW*0.45,-triW); ctx.lineTo(OUR-OUW*0.45,triW); ctx.closePath();
+    ctx.fillStyle='#ff2020';
+    ctx.shadowColor='#ff0000'; ctx.shadowBlur=running?(16+pulse*8):10;
+    ctx.fill(); ctx.shadowBlur=0;
+    ctx.beginPath(); ctx.moveTo(OUR+OUW*0.4,0); ctx.lineTo(OUR-OUW*0.3,0);
+    ctx.strokeStyle='rgba(255,200,200,0.85)'; ctx.lineWidth=1.5; ctx.stroke();
+    ctx.restore();
+
+    // GREEN start triangle
+    ctx.save(); ctx.translate(CX,CY); ctx.rotate(startA);
+    ctx.beginPath();
+    ctx.moveTo(OUR+OUW*0.5,0); ctx.lineTo(OUR-OUW*0.45,-triW); ctx.lineTo(OUR-OUW*0.45,triW); ctx.closePath();
+    ctx.fillStyle='#00ff55';
+    ctx.shadowColor='#00ff55'; ctx.shadowBlur=running?(16+pulse*8):10;
+    ctx.fill(); ctx.shadowBlur=0;
+    ctx.beginPath(); ctx.moveTo(OUR+OUW*0.4,0); ctx.lineTo(OUR-OUW*0.3,0);
+    ctx.strokeStyle='rgba(180,255,200,0.85)'; ctx.lineWidth=1.5; ctx.stroke();
+    ctx.restore();
+
+    // Label positions — well inside face, not competing with outer ring
+    const fPct = (R/W)*100 * 0.78; // ~70% of face radius as %
+    setLabelPos('flS', startA, fPct*0.92);
+    const workAng = pct>0.08 ? startA+(clampedNow-startA)*0.5 : startA+0.7;
+    setLabelPos('flW', workAng, fPct*0.52);
+    const pauseAng = psa+(pLatestA-psa)*0.5;
+    setLabelPos('flP', pauseAng, fPct*0.70);
+    setLabelPos('flE', rA, fPct*0.60);
+  }
+
+  // ── CLOCK FACE: ticks stay clearly inside face, away from outer ring ──
+  const tickFont = Math.max(7, R*0.046);
+  const majFont  = Math.max(9, R*0.093);
+  for(let i=0;i<60;i++){
+    const a=(i/60)*PI2-hPI;
+    const is15=i%15===0, is5=i%5===0;
+    ctx.save();
+    ctx.beginPath();
+    // Ticks end at R*0.88 — clear gap before outer ring starts at R
+    ctx.moveTo(CX+Math.cos(a)*(is15?R*0.66:is5?R*0.74:R*0.82), CY+Math.sin(a)*(is15?R*0.66:is5?R*0.74:R*0.82));
+    ctx.lineTo(CX+Math.cos(a)*(R*0.88), CY+Math.sin(a)*(R*0.88));
+    ctx.strokeStyle=is15?'#ffffff':is5?'#cccccc':'#555';
+    ctx.lineWidth=is15?3:is5?2:1; ctx.stroke(); ctx.restore();
+  }
+
+  ctx.save(); ctx.textAlign='center'; ctx.textBaseline='middle';
+  for(let h=1;h<=12;h++){
+    const a=(h/12)*PI2-hPI, isMaj=h%3===0;
+    ctx.font=isMaj?`bold ${majFont}px Orbitron,sans-serif`:`bold ${tickFont}px Orbitron,sans-serif`;
+    ctx.fillStyle=isMaj?'#ffffff':'#999';
+    if(isMaj){ctx.shadowColor='rgba(255,255,255,0.2)';ctx.shadowBlur=4;}
+    ctx.fillText(String(h), CX+Math.cos(a)*(R*0.585), CY+Math.sin(a)*(R*0.585));
+    ctx.shadowBlur=0;
+  }
+  ctx.restore();
+
+  // Face rim — subtle separator between face and outer ring
+  ctx.save(); ctx.beginPath(); ctx.arc(CX,CY,R,0,PI2);
+  ctx.strokeStyle='#2a2a2a'; ctx.lineWidth=1.5; ctx.stroke(); ctx.restore();
+}
+
+function tick(){
+  S.phase+=0.055;
+  const now=Date.now();
+  if(!S.startTs){draw();return;}
+  const workMs=S.workHours*3600000, mandMs=30*60000;
+  const pauseMs=S.paused?(S.totalPauseMs+(now-S.pauseStart)):S.totalPauseMs;
+  const remain=S.startTs+workMs+mandMs+pauseMs-now;
+  const pEarliest=S.startTs+3*3600000+pauseMs;
+  const pLatest=S.startTs+5*3600000+pauseMs;
+  refreshLabels(now);
+  if(remain<=0&&!S.dFired){
+    S.dFired=true; setStatus('done','ARBEJDSDAGEN ER SLUT');
+    document.getElementById('hpLed').className='hp-led';
+    toast('✓ ARBEJDSDAGEN ER SLUT!';
+  } else if(now>=pLatest&&!S.bFired&&!S.paused&&!S.frokostTs){
+    S.bFired=true; setStatus('warn','FROKOSTPAUSE SKAL TAGES NU!');
+    document.getElementById('hpLed').className='hp-led warn';
+    toast('⚨ FROKOST SKAL TAGES NU!');
+  } else if(now>=pEarliest&&!S.bFired&&!S.paused&&!S.frokostTs){
+    // Update status to show frokost window is open (without firing bFired yet)
+  }
+  draw();
+}
+
+function toast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  clearTimeout(t._t); t._t=setTimeout(()=>t.classList.remove('show'),3500);
+}
+
+// Idle loop — keeps NU label current always
+setInterval(()=>{
+  if(!S.running){
+    draw();
+    document.getElementById('flNv').textContent=fmtClock(Date.now());
+  }
+},50);
+
+// Resize handler
+function onResize(){
+  resizeCanvas();
+  draw();
+}
+window.addEventListener('resize', onResize);
+
+// Init — wait for full layout before first draw
+function init(){
+  resizeCanvas();
+  setStatus('','TRYK START');
+  draw();
+}
+if(document.readyState === 'complete'){
+  init();
+} else {
+  window.addEventListener('load', init);
+}
+</script>
 </body>
-</html>
+ </html>
