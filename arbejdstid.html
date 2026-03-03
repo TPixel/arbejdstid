@@ -759,7 +759,7 @@ function tick(){
   if(remain<=0&&!S.dFired){
     S.dFired=true; setStatus('done','ARBEJDSDAGEN ER SLUT');
     document.getElementById('hpLed').className='hp-led';
-    toast('✓ ARBEJDSDAGEN ER SLUT!';
+    toast('✓ ARBEJDSDAGEN ER SLUT!');
   } else if(now>=pLatest&&!S.bFired&&!S.paused&&!S.frokostTs){
     S.bFired=true; setStatus('warn','FROKOSTPAUSE SKAL TAGES NU!');
     document.getElementById('hpLed').className='hp-led warn';
