@@ -1,0 +1,1088 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>KØRETID MK-I</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+  background:#050608;
+  background-image:radial-gradient(ellipse 100% 60% at 50% -5%,rgba(0,15,35,0.55) 0%,transparent 65%);
+  min-height:100vh;min-height:100dvh;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:1rem;font-family:'Share Tech Mono',monospace;color:#a8c0d0;
+  touch-action:manipulation;overflow:hidden;
+}
+.panel{
+  background:linear-gradient(160deg,#0b0e14 0%,#07090d 100%);
+  border:1px solid #181e28;border-radius:18px;
+  padding:1.1rem 1.3rem 1.2rem;
+  display:flex;flex-direction:column;align-items:center;gap:0.7rem;
+  position:relative;
+  box-shadow:0 0 0 1px #040508,0 40px 100px rgba(0,0,0,0.92),inset 0 1px 0 rgba(255,255,255,0.03);
+  width:100%;max-width:420px;
+}
+.rv{position:absolute;width:7px;height:7px;border-radius:50%;
+  background:radial-gradient(circle at 35% 30%,#252b35,#101318);
+  box-shadow:inset 0 1px 3px rgba(0,0,0,0.95),0 1px 0 rgba(255,255,255,0.03);}
+.rv.p1{top:9px;left:9px}.rv.p2{top:9px;right:9px}
+.rv.p3{bottom:9px;left:9px}.rv.p4{bottom:9px;right:9px}
+
+/* Header */
+.header-plate{
+  display:flex;align-items:center;justify-content:space-between;
+  width:100%;max-width:380px;
+  background:#080b10;border:1px solid #161d26;border-radius:6px;padding:0.32rem 0.8rem;
+  cursor:pointer;user-select:none;
+}
+.hp-title{font-family:'Orbitron',monospace;font-weight:900;font-size:0.55rem;letter-spacing:0.38em;color:#1a2535;text-transform:uppercase}
+.hp-right{display:flex;align-items:center;gap:0.5rem}
+.hp-led{width:5px;height:5px;border-radius:50%;background:#101520;transition:all 0.3s}
+.hp-led.on {background:#22aaff;box-shadow:0 0 6px #22aaff}
+.hp-led.warn{background:#ffcc00;box-shadow:0 0 6px #ffcc00;animation:blink 0.7s infinite}
+.hp-led.alert{background:#ff3311;box-shadow:0 0 8px #ff3311;animation:blink 0.35s infinite}
+.hp-led.ok  {background:#00ee55;box-shadow:0 0 6px #00ee55}
+.hp-ser{font-size:0.44rem;letter-spacing:0.18em;color:#182030}
+.hp-ext{font-size:0.42rem;letter-spacing:0.1em;color:#1a2535;cursor:pointer;padding:0.15rem 0.4rem;border:1px solid #1a2535;border-radius:3px;transition:all 0.2s}
+.hp-ext.on{color:#22aaff;border-color:#22aaff;text-shadow:0 0 6px rgba(34,170,255,0.5)}
+
+/* Settings drawer */
+.settings-drawer{
+  width:100%;max-width:380px;overflow:hidden;
+  max-height:0;transition:max-height 0.35s cubic-bezier(0.4,0,0.2,1),opacity 0.25s;opacity:0;
+}
+.settings-drawer.open{max-height:80px;opacity:1;}
+.settings-inner{
+  display:flex;align-items:center;gap:0.8rem;padding:0.4rem 0 0.1rem;flex-wrap:wrap;
+}
+.shift-tag{font-size:0.46rem;letter-spacing:0.15em;color:#2a3848;text-transform:uppercase}
+.sbt{padding:0.28rem 0.7rem;background:#0a0d14;color:#222c3a;font-family:'Orbitron',monospace;
+  font-size:0.56rem;font-weight:700;letter-spacing:0.05em;border:1px solid #181e28;border-radius:4px;cursor:pointer;}
+.sbt.on{background:#08162a;color:#22aaff;border-color:#22aaff;text-shadow:0 0 8px rgba(34,170,255,0.6)}
+
+/* Instrument wrap */
+.instrument-wrap{position:relative;display:flex;align-items:center;justify-content:center}
+.instrument-wrap{width:min(360px,calc(100vw - 3rem));height:min(360px,calc(100vw - 3rem))}
+
+/* Orbital buttons */
+.obutton{
+  position:absolute;
+  width:min(54px,14vw);height:min(54px,14vw);
+  border-radius:50%;
+  background:radial-gradient(circle at 40% 30%,#171c24,#0a0d12);
+  border:2px solid #22283200;color:#283040;
+  font-family:'Orbitron',monospace;font-size:min(0.44rem,1.6vw);font-weight:700;
+  cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  text-transform:uppercase;line-height:1.3;
+  box-shadow:0 4px 12px rgba(0,0,0,0.85),inset 0 1px 0 rgba(255,255,255,0.04);
+  transition:all 0.12s;user-select:none;-webkit-tap-highlight-color:transparent;
+  border-color:#22283200;
+}
+.obutton{border-color:#222830}
+.obutton:hover{border-color:#3a4455;color:#a8c0d0}
+.obutton:active{transform:scale(0.85);box-shadow:0 2px 6px rgba(0,0,0,0.9),inset 0 2px 4px rgba(0,0,0,0.5)}
+/* Active states */
+.ob-driving{background:radial-gradient(circle at 40% 30%,#004488,#002255);border-color:#22aaff;color:#cceeff;box-shadow:0 0 22px rgba(34,170,255,0.55),0 4px 12px rgba(0,0,0,0.8)}
+.ob-pausing{background:radial-gradient(circle at 40% 30%,#443300,#221800);border-color:#ffcc00;color:#fff0aa;box-shadow:0 0 22px rgba(255,200,0,0.5),0 4px 12px rgba(0,0,0,0.8)}
+.ob-resting{background:radial-gradient(circle at 40% 30%,#002240,#001020);border-color:#3388bb;color:#88ccee;box-shadow:0 0 16px rgba(50,150,200,0.4),0 4px 12px rgba(0,0,0,0.8)}
+.ob-working{background:radial-gradient(circle at 40% 30%,#1a2810,#0e1608);border-color:#558833;color:#aaccaa;box-shadow:0 0 16px rgba(80,150,40,0.35),0 4px 12px rgba(0,0,0,0.8)}
+.ob-icon{font-size:min(1.05rem,3.7vw);line-height:1;display:flex;align-items:center;justify-content:center}
+.ob-lbl{font-size:min(0.37rem,1.3vw);letter-spacing:0.04em;margin-top:2px}
+.ob-top{top:0;left:50%;transform:translateX(-50%)}
+.ob-tr{top:18%;right:0}
+.ob-br{bottom:18%;right:0}
+.ob-bl{bottom:18%;left:0}
+.ob-tl{top:18%;left:0}
+
+/* Instrument face */
+.instrument{position:relative;width:min(280px,74vw);height:min(280px,74vw)}
+.bezel-ring{
+  position:absolute;inset:-16px;border-radius:50%;
+  background:radial-gradient(circle,#161c22 60%,#0c1014 100%);
+  box-shadow:inset 0 2px 8px rgba(0,0,0,0.95),0 0 0 2px #050708,0 0 0 4px #12181e,0 0 0 6px #050708,0 8px 30px rgba(0,0,0,0.9);
+  z-index:0;
+}
+.knurl-ring{
+  position:absolute;inset:-12px;border-radius:50%;
+  background:repeating-conic-gradient(#161c22 0deg 3deg,#0c1014 3deg 6deg);
+  opacity:0.65;z-index:0;
+}
+canvas{position:absolute;top:0;left:0;width:100%;height:100%;border-radius:50%;z-index:1}
+
+/* Face labels */
+.face-labels{position:absolute;top:0;left:0;width:100%;height:100%;z-index:2}
+.flabel{
+  position:absolute;transform:translate(-50%,-50%);
+  text-align:center;cursor:default;pointer-events:none;user-select:none;
+  transition:filter 0.15s;
+}
+.fv{font-family:'Orbitron',monospace;font-size:min(0.76rem,2.4vw);font-weight:900;line-height:1}
+.fl{font-size:min(0.33rem,1.05vw);letter-spacing:0.13em;text-transform:uppercase;opacity:0.65;margin-top:2px}
+.fm{font-size:min(0.29rem,0.95vw);letter-spacing:0.08em;opacity:0.4;margin-top:1px}
+
+.blu .fv{color:#22aaff;text-shadow:0 0 12px rgba(34,170,255,0.9),0 0 28px rgba(34,170,255,0.3)}
+.blu .fl{color:#22aaff}.blu .fm{color:#22aaff}
+.grn .fv{color:#00ee55;text-shadow:0 0 12px rgba(0,238,85,0.9)}
+.grn .fl{color:#00ee55}.grn .fm{color:#00ee55}
+.yel .fv{color:#ffcc00;text-shadow:0 0 12px rgba(255,200,0,0.9)}
+.yel .fl{color:#ffcc00}.yel .fm{color:#ffcc00}
+.red .fv{color:#ff2828;text-shadow:0 0 14px rgba(255,40,40,0.9)}
+.red .fl{color:#ff2828}.red .fm{color:#ff2828}
+.cya .fv{color:#22ddcc;text-shadow:0 0 12px rgba(34,220,200,0.8)}
+.cya .fl{color:#22ddcc}.cya .fm{color:#22ddcc}
+.dim .fv{color:#1c2430}.dim .fl{color:#1c2430}.dim .fm{color:#1c2430}
+@keyframes flashIn{0%{opacity:0;filter:brightness(5)}50%{opacity:1;filter:brightness(2)}100%{opacity:1;filter:brightness(1)}}
+.flash{animation:flashIn 0.8s ease both}
+@keyframes pulse{0%,100%{filter:brightness(1)}50%{filter:brightness(1.6)}}
+.pulsing{animation:pulse 0.6s ease infinite}
+
+/* Status bar */
+.status-bar{
+  width:100%;max-width:340px;background:#070a10;border:1px solid #131820;
+  border-radius:5px;padding:0.28rem 0.75rem;
+  display:flex;align-items:center;justify-content:space-between;gap:0.5rem;
+}
+.sb-led{width:5px;height:5px;border-radius:50%;background:#0e1420;transition:all 0.3s;flex-shrink:0}
+.sb-led.on  {background:#22aaff;box-shadow:0 0 7px #22aaff}
+.sb-led.warn{background:#ffcc00;box-shadow:0 0 7px #ffcc00;animation:blink 0.7s infinite}
+.sb-led.alert{background:#ff2828;box-shadow:0 0 8px #ff2828;animation:blink 0.35s infinite}
+.sb-led.ok  {background:#00ee55;box-shadow:0 0 7px #00ee55}
+.sb-led.cya {background:#22ddcc;box-shadow:0 0 7px #22ddcc}
+.sb-txt{font-size:0.53rem;letter-spacing:0.17em;color:#1e2c3a;text-transform:uppercase;flex:1;text-align:center}
+.sb-txt.on  {color:#22aaff;text-shadow:0 0 8px rgba(34,170,255,0.4)}
+.sb-txt.warn{color:#ffcc00}
+.sb-txt.alert{color:#ff2828}
+.sb-txt.ok  {color:#00ee55}
+.sb-txt.cya {color:#22ddcc}
+
+/* Rules bar */
+.rules-bar{
+  width:100%;max-width:380px;
+  display:grid;grid-template-columns:1fr 1fr 1fr;gap:0.35rem;
+}
+.rule-cell{
+  background:#070a10;border:1px solid #111820;border-radius:4px;
+  padding:0.25rem 0.4rem;text-align:center;
+}
+.rule-val{font-family:'Orbitron',monospace;font-size:0.56rem;font-weight:900;color:#22aaff;letter-spacing:0.05em}
+.rule-lbl{font-size:0.35rem;letter-spacing:0.1em;color:#2a3848;text-transform:uppercase;margin-top:1px}
+.rule-cell.warn-cell .rule-val{color:#ffcc00}
+.rule-cell.alert-cell .rule-val{color:#ff2828}
+
+/* Legend */
+.legend{display:flex;gap:0.55rem;align-items:center;font-size:0.46rem;color:#253040;letter-spacing:0.06em;flex-wrap:wrap;justify-content:center}
+.ld{width:14px;height:3px;border-radius:2px;display:inline-block;margin-right:0.25rem;vertical-align:middle}
+.li{display:flex;align-items:center}
+
+/* Toast */
+.toast{
+  position:fixed;bottom:1.2rem;left:50%;transform:translateX(-50%) translateY(80px);
+  background:#070a10;border:1px solid #0a1828;color:#22aaff;
+  font-family:'Orbitron',monospace;font-size:0.58rem;letter-spacing:0.12em;
+  padding:0.55rem 1.2rem;border-radius:5px;
+  transition:transform 0.4s cubic-bezier(0.34,1.56,0.64,1);z-index:100;
+  white-space:nowrap;max-width:90vw;overflow:hidden;text-overflow:ellipsis;
+}
+.toast.show{transform:translateX(-50%) translateY(0)}
+.toast.warn{color:#ffcc00;border-color:#332200}
+.toast.alert{color:#ff2828;border-color:#330000}
+.toast.ok{color:#00ee55;border-color:#003318}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0.2}}
+</style>
+</head>
+<body>
+<div class="panel">
+  <div class="rv p1"></div><div class="rv p2"></div>
+  <div class="rv p3"></div><div class="rv p4"></div>
+
+  <div class="header-plate" onclick="toggleSettings()">
+    <div class="hp-title">KØRETID MK-I</div>
+    <div class="hp-right">
+      <div class="hp-led" id="hpLed"></div>
+      <div class="hp-ser">EU·561/2006</div>
+      <span class="hp-ext" id="extBtn" onclick="toggleExt(event)" title="Udvid daglig køretid til 10t (2x/uge)">10T</span>
+    </div>
+  </div>
+
+  <div class="settings-drawer" id="settingsDrawer">
+    <div class="settings-inner">
+      <span class="shift-tag">DAG</span>
+      <button class="sbt on" id="s9" onclick="setMaxDay(9)">9T STD</button>
+      <button class="sbt"    id="s10" onclick="setMaxDay(10)">10T EXT</button>
+      <span class="shift-tag" style="margin-left:0.5rem">NULSTIL</span>
+      <button class="sbt" onclick="resetAll()">↺ RESET</button>
+    </div>
+  </div>
+
+  <div class="instrument-wrap" id="instrumentWrap">
+    <!-- TOP: Kørsel -->
+    <button class="obutton ob-top" id="obK" onclick="doMode('kørsel')">
+      <span class="ob-icon">🚛</span>
+      <span class="ob-lbl" id="lblK">KØRSEL</span>
+    </button>
+    <!-- TR: Pause -->
+    <button class="obutton ob-tr" id="obP" onclick="doMode('pause')">
+      <span class="ob-icon">☕</span>
+      <span class="ob-lbl">PAUSE</span>
+    </button>
+    <!-- BR: Hvil -->
+    <button class="obutton ob-br" id="obH" onclick="doMode('hvil')">
+      <span class="ob-icon">🛏</span>
+      <span class="ob-lbl">HVIL</span>
+    </button>
+    <!-- BL: Andet arbejde -->
+    <button class="obutton ob-bl" id="obA" onclick="doMode('andet')">
+      <span class="ob-icon">🔧</span>
+      <span class="ob-lbl">ANDET</span>
+    </button>
+    <!-- TL: Log -->
+    <button class="obutton ob-tl" onclick="showLog()">
+      <span class="ob-icon">📋</span>
+      <span class="ob-lbl">LOG</span>
+    </button>
+
+    <div class="instrument" id="instrument">
+      <div class="bezel-ring"></div>
+      <div class="knurl-ring"></div>
+      <canvas id="c"></canvas>
+      <div class="face-labels" id="faceLabels">
+
+        <!-- Center: current time -->
+        <div class="flabel blu" id="flN" style="left:50%;top:50%">
+          <div class="fv" id="flNv" style="font-size:min(1.15rem,4vw)">--:--</div>
+          <div class="fl">NU</div>
+          <div class="fm" id="flNstart" style="opacity:0.6;letter-spacing:0.06em"></div>
+        </div>
+
+        <!-- 12: Continuous drive -->
+        <div class="flabel dim" id="flK">
+          <div class="fv" id="flKv">0:00</div>
+          <div class="fl" id="flKl">KONT.KØRSEL</div>
+          <div class="fm" id="flKm">MAX 4:30</div>
+        </div>
+
+        <!-- 3: Remaining drive today -->
+        <div class="flabel dim" id="flR">
+          <div class="fv" id="flRv">9:00</div>
+          <div class="fl" id="flRl">REST I DAG</div>
+          <div class="fm" id="flRm">AF 9T</div>
+        </div>
+
+        <!-- 6: Daily drive total -->
+        <div class="flabel dim" id="flD">
+          <div class="fv" id="flDv">0:00</div>
+          <div class="fl" id="flDl">KØRT I DAG</div>
+          <div class="fm" id="flDm"></div>
+        </div>
+
+        <!-- 9: Break / pause info -->
+        <div class="flabel dim" id="flB">
+          <div class="fv" id="flBv">--:--</div>
+          <div class="fl" id="flBl">PAUSE</div>
+          <div class="fm" id="flBm">BEHOV 45 MIN</div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Live rule cells -->
+  <div class="rules-bar" id="rulesBar">
+    <div class="rule-cell" id="rcK">
+      <div class="rule-val" id="rcKv">4:30</div>
+      <div class="rule-lbl">KONT. REST</div>
+    </div>
+    <div class="rule-cell" id="rcD">
+      <div class="rule-val" id="rcDv">9:00</div>
+      <div class="rule-lbl">DAG REST</div>
+    </div>
+    <div class="rule-cell" id="rcB">
+      <div class="rule-val" id="rcBv">0:45</div>
+      <div class="rule-lbl">PAUSE BEHOV</div>
+    </div>
+  </div>
+
+  <div class="status-bar">
+    <div class="sb-led" id="sbL1"></div>
+    <div class="sb-txt" id="sbTxt">TRYK KØRSEL ELLER ANDET FOR AT STARTE</div>
+    <div class="sb-led" id="sbL2"></div>
+  </div>
+
+  <div class="legend">
+    <div class="li"><span class="ld" style="background:linear-gradient(90deg,#001030,#22aaff)"></span>Kont. kørsel (4½t)</div>
+    <div class="li"><span class="ld" style="background:linear-gradient(90deg,#001510,#00ee55)"></span>Daglig kørsel (9t)</div>
+    <div class="li"><span class="ld" style="background:#22ddcc"></span>Pause (45 min)</div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ════════════════════════════════════════════
+//  CONSTANTS  (EU 561/2006)
+// ════════════════════════════════════════════
+const MAX_CONT_MS   = 4.5  * 3600000;  // 4h30 continuous
+const MAX_DAILY_STD = 9    * 3600000;  // 9h daily (standard)
+const MAX_DAILY_EXT = 10   * 3600000;  // 10h daily (extended)
+const REQ_BREAK_MS  = 45   * 60000;    // 45 min break required
+const WARN_CONT_MS  = 4    * 3600000;  // warn at 4h continuous
+const WARN_DAILY_MS = 8    * 3600000;  // warn at 8h daily
+
+// ════════════════════════════════════════════
+//  CANVAS
+// ════════════════════════════════════════════
+let W, H, CX, CY, R;
+const canvas = document.getElementById('c');
+const ctx    = canvas.getContext('2d');
+const PI2 = Math.PI * 2, hPI = Math.PI / 2;
+
+function resizeCanvas() {
+  const instr = document.getElementById('instrument');
+  const size  = instr.offsetWidth || Math.min(window.innerWidth, window.innerHeight) * 0.82;
+  W = H = size; CX = CY = size / 2; R = size / 2 * 0.84;
+  canvas.width = size; canvas.height = size;
+}
+
+// ════════════════════════════════════════════
+//  HELPERS
+// ════════════════════════════════════════════
+const pad = n => String(Math.floor(Math.abs(n))).padStart(2, '0');
+function fmtClock(ts) { const d = new Date(ts); return pad(d.getHours()) + ':' + pad(d.getMinutes()); }
+function fmtDur(ms) {
+  if (ms <= 0) return '0:00';
+  const h = Math.floor(ms / 3600000), m = Math.floor((ms % 3600000) / 60000);
+  return h + ':' + pad(m);
+}
+function fmtDurFull(ms) {
+  if (ms <= 0) return '0:00';
+  const h = Math.floor(ms / 3600000), m = Math.floor((ms % 3600000) / 60000), s = Math.floor((ms % 60000) / 1000);
+  return h + ':' + pad(m) + ':' + pad(s);
+}
+
+// ════════════════════════════════════════════
+//  STATE
+// ════════════════════════════════════════════
+let S = {
+  mode: 'hvil',           // 'hvil' | 'kørsel' | 'pause' | 'andet'
+  modeStart: null,
+  maxDailyMs: MAX_DAILY_STD,
+  extendedDay: false,
+
+  // Continuous driving
+  contDriveMs:      0,    // accumulated (before current segment)
+  contDriveSegStart: null,// when current drive segment started
+
+  // Break tracking
+  breakMs:      0,        // accumulated break (in current pause session)
+  breakSegStart: null,    // when current pause segment started
+
+  // Daily drive
+  dailyDriveMs:      0,
+  dailyDriveSegStart: null,
+  dayStart: null,
+
+  // Other work
+  andetMs:      0,
+  andetSegStart: null,
+
+  // Alerts (reset when drive resets)
+  warned30:    false,
+  warnedStop:  false,
+  warned8h:    false,
+  warnedDay:   false,
+  toastedOk:   false,
+
+  phase: 0,
+  iv: null,
+
+  // Log
+  segments: [],   // {type, start, end, ms}
+};
+
+// Current live totals (non-destructive)
+function getLive() {
+  const now = Date.now();
+  let contMs  = S.contDriveMs;
+  let dailyMs = S.dailyDriveMs;
+  let breakMs = S.breakMs;
+  let andetMs = S.andetMs;
+  if (S.mode === 'kørsel' && S.contDriveSegStart) {
+    const seg = now - S.contDriveSegStart;
+    contMs  += seg;
+    dailyMs += seg;
+  }
+  if ((S.mode === 'pause' || S.mode === 'hvil') && S.breakSegStart) {
+    breakMs += now - S.breakSegStart;
+  }
+  if (S.mode === 'andet' && S.andetSegStart) {
+    andetMs += now - S.andetSegStart;
+  }
+  return { contMs, dailyMs, breakMs, andetMs, now };
+}
+
+// ════════════════════════════════════════════
+//  MODE TRANSITIONS
+// ════════════════════════════════════════════
+function doMode(newMode) {
+  if (newMode === S.mode) return;
+  const now = Date.now();
+
+  // ── Finalise leaving current mode ──
+  if (S.mode === 'kørsel' && S.contDriveSegStart) {
+    const seg = now - S.contDriveSegStart;
+    S.contDriveMs  += seg;
+    S.dailyDriveMs += seg;
+    S.segments.push({ type: 'kørsel', start: S.contDriveSegStart, end: now, ms: seg });
+    S.contDriveSegStart  = null;
+  }
+  if ((S.mode === 'pause' || S.mode === 'hvil') && S.breakSegStart) {
+    S.breakMs += now - S.breakSegStart;
+    S.segments.push({ type: S.mode, start: S.breakSegStart, end: now, ms: now - S.breakSegStart });
+    S.breakSegStart = null;
+  }
+  if (S.mode === 'andet' && S.andetSegStart) {
+    S.andetMs += now - S.andetSegStart;
+    S.segments.push({ type: 'andet', start: S.andetSegStart, end: now, ms: now - S.andetSegStart });
+    S.andetSegStart = null;
+  }
+
+  // ── Check if break qualifies (≥45 min) ──
+  // This applies when we're LEAVING a pause/hvil period to go driving
+  const breakQualified = S.breakMs >= REQ_BREAK_MS;
+
+  // ── Enter new mode ──
+  S.mode      = newMode;
+  S.modeStart = now;
+
+  if (newMode === 'kørsel') {
+    if (!S.dayStart) S.dayStart = now;
+    if (breakQualified) {
+      // Break was long enough — reset continuous drive
+      S.contDriveMs = 0;
+      S.warned30   = false;
+      S.warnedStop = false;
+      S.toastedOk  = false;
+      toast('▶ KØRSEL — PAUSE GODKENDT ✓ KONTINU. NULSTILLET', 'ok');
+    } else if (S.contDriveMs === 0 && S.dailyDriveMs === 0) {
+      toast('▶ KØRSEL STARTET', 'info');
+    } else {
+      const remaining = fmtDur(MAX_CONT_MS - S.contDriveMs);
+      toast('▶ KØRSEL GENOPTAGET — ' + remaining + ' TIL TVUNGEN PAUSE', 'warn');
+    }
+    S.breakMs       = 0;  // reset break accum for next pause
+    S.contDriveSegStart  = now;
+    S.dailyDriveSegStart = now;
+    document.getElementById('hpLed').className = 'hp-led on';
+    setStatus('on', 'KØRSEL — ' + fmtDur(MAX_CONT_MS - S.contDriveMs) + ' TIL PAUSE');
+    if (!S.iv) S.iv = setInterval(tick, 50);
+    activateLabels();
+
+  } else if (newMode === 'pause') {
+    S.breakMs      = 0;   // fresh break period
+    S.breakSegStart = now;
+    S.toastedOk    = false;
+    toast('☕ PAUSE STARTET — BEHOV: 45 MIN', 'warn');
+    document.getElementById('hpLed').className = 'hp-led warn';
+    setStatus('warn', 'PAUSE — 0:45 PÅKRÆVET');
+
+  } else if (newMode === 'andet') {
+    // Other work: doesn't count as qualifying break, but DOES mark day start
+    const firstActivity = !S.dayStart;
+    if (!S.dayStart) S.dayStart = now;
+    S.andetSegStart = now;
+    S.breakSegStart = null;
+    if (firstActivity) {
+      toast('🔧 DAGSTART ' + fmtClock(now) + ' — ANDET ARBEJDE', 'info');
+      setStatus('', 'ANDET ARBEJDE — DAGSTART KL. ' + fmtClock(now));
+      activateLabels();
+    } else {
+      toast('🔧 ANDET ARBEJDE', 'info');
+      setStatus('', 'ANDET ARBEJDE — DAGSTART KL. ' + fmtClock(S.dayStart));
+    }
+    document.getElementById('hpLed').className = 'hp-led';
+    if (!S.iv) S.iv = setInterval(tick, 50);
+
+  } else if (newMode === 'hvil') {
+    S.breakMs       = 0;
+    S.breakSegStart = now;
+    S.toastedOk     = false;
+    const driven = fmtDur(S.dailyDriveMs);
+    toast('🛏 DAGLIG HVIL — MIN 11 TIMER / KØRT: ' + driven, 'info');
+    document.getElementById('hpLed').className = 'hp-led';
+    setStatus('cya', 'DAGLIG HVIL — MIN 11 TIMER');
+    // Daily rest always qualifies as a full break — reset immediately visually
+    // (contDriveMs will reset when next kørsel is started after ≥45 min)
+    if (S.iv) { clearInterval(S.iv); S.iv = null; }
+    draw(getLive());
+  }
+
+  updateButtons();
+}
+
+// ════════════════════════════════════════════
+//  TICK — called every 50ms during kørsel
+// ════════════════════════════════════════════
+function tick() {
+  S.phase += 0.055;
+  const live = getLive();
+  refreshLabels(live);
+  fireAlerts(live);
+  draw(live);
+}
+
+function fireAlerts(live) {
+  if (S.mode !== 'kørsel') return;
+  const maxD = S.maxDailyMs;
+
+  if (!S.warned30 && live.contMs >= WARN_CONT_MS) {
+    S.warned30 = true;
+    toast('⚠ 30 MIN TIL TVUNGEN PAUSE!', 'warn');
+    document.getElementById('hpLed').className = 'hp-led warn';
+  }
+  if (!S.warnedStop && live.contMs >= MAX_CONT_MS) {
+    S.warnedStop = true;
+    toast('🛑 STOP! TVUNGEN PAUSE NU! MAX 4:30 OVERSKREDET', 'alert');
+    document.getElementById('hpLed').className = 'hp-led alert';
+    setStatus('alert', '⛔ TVUNGEN PAUSE — STOP STRAKS!');
+  }
+  if (!S.warned8h && live.dailyMs >= WARN_DAILY_MS) {
+    S.warned8h = true;
+    toast('⚠ 1 TIME TILBAGEVÆRENDE I DAG!', 'warn');
+  }
+  if (!S.warnedDay && live.dailyMs >= maxD) {
+    S.warnedDay = true;
+    toast('🛑 DAGLIG GRÆNSE NÅET — ' + (S.extendedDay ? '10T' : '9T'), 'alert');
+    setStatus('alert', '⛔ DAGLIG GRÆNSE NÅET — STOP!');
+  }
+
+  // Live status update (not already in alert state)
+  if (!S.warnedStop && !S.warnedDay) {
+    const contRem  = Math.max(0, MAX_CONT_MS - live.contMs);
+    const dailyRem = Math.max(0, maxD - live.dailyMs);
+    const limiting = Math.min(contRem, dailyRem);
+    if (contRem < dailyRem) {
+      setStatus(contRem < 30 * 60000 ? 'warn' : 'on',
+        'KØRSEL — PAUSE OM: ' + fmtDur(contRem));
+    } else {
+      setStatus(dailyRem < 60 * 60000 ? 'warn' : 'on',
+        'KØRSEL — DAG REST: ' + fmtDur(dailyRem));
+    }
+  }
+}
+
+// ════════════════════════════════════════════
+//  LABEL UPDATES
+// ════════════════════════════════════════════
+function refreshLabels(live) {
+  const maxD = S.maxDailyMs;
+
+  // Center: current time + dagstart
+  document.getElementById('flNv').textContent = fmtClock(live.now || Date.now());
+  const startEl = document.getElementById('flNstart');
+  if (startEl) startEl.textContent = S.dayStart ? 'START ' + fmtClock(S.dayStart) : '';
+
+  // ── Continuous drive (12 position) ──
+  const contRem = Math.max(0, MAX_CONT_MS - live.contMs);
+  const kEl = document.getElementById('flK');
+  document.getElementById('flKv').textContent = fmtDur(live.contMs);
+  document.getElementById('flKl').textContent = 'KONT.KØRSEL';
+  document.getElementById('flKm').textContent = 'PAUSE OM: ' + fmtDur(contRem);
+  if (S.mode === 'pause') {
+    // Show break progress instead
+    document.getElementById('flKv').textContent = fmtDur(live.breakMs);
+    document.getElementById('flKl').textContent = live.breakMs >= REQ_BREAK_MS ? 'PAUSE OK ✓' : 'PAUSE';
+    document.getElementById('flKm').textContent = live.breakMs >= REQ_BREAK_MS ? '45 MIN AFHOLDT' : fmtDur(Math.max(0, REQ_BREAK_MS - live.breakMs)) + ' MANGLER';
+    kEl.className = 'flabel ' + (live.breakMs >= REQ_BREAK_MS ? 'grn' : live.breakMs > 30 * 60000 ? 'yel' : 'cya');
+  } else {
+    kEl.className = 'flabel ' + (live.contMs === 0 ? 'blu dim' :
+      live.contMs >= MAX_CONT_MS ? 'red pulsing' :
+      live.contMs >= WARN_CONT_MS ? 'yel' : 'blu');
+  }
+
+  // ── Daily remaining (3 position) ──
+  const dailyRem = Math.max(0, maxD - live.dailyMs);
+  const rEl = document.getElementById('flR');
+  document.getElementById('flRv').textContent = fmtDur(dailyRem);
+  document.getElementById('flRl').textContent = 'REST I DAG';
+  document.getElementById('flRm').textContent = (S.extendedDay ? '10T' : '9T') + ' MAX';
+  rEl.className = 'flabel ' +
+    (dailyRem <= 0 ? 'red pulsing' :
+     dailyRem < 60 * 60000 ? 'red' :
+     dailyRem < 2 * 3600000 ? 'yel' : 'grn');
+
+  // ── Daily total (6 position) ──
+  const dEl = document.getElementById('flD');
+  const totalWorkMs = live.dailyMs + (live.andetMs || 0);
+  document.getElementById('flDv').textContent = fmtDur(live.dailyMs);
+  document.getElementById('flDl').textContent = 'KØRT I DAG';
+  document.getElementById('flDm').textContent = (live.andetMs || 0) > 0
+    ? 'ANDET: ' + fmtDur(live.andetMs) : '';
+  dEl.className = 'flabel ' +
+    (live.dailyMs === 0 && !(live.andetMs > 0) ? 'grn dim' :
+     live.dailyMs >= maxD ? 'red' :
+     live.dailyMs >= WARN_DAILY_MS ? 'yel' : 'grn');
+
+  // ── Break / pause (9 position) ──
+  const bEl = document.getElementById('flB');
+  if (S.mode === 'pause') {
+    const bRem = Math.max(0, REQ_BREAK_MS - live.breakMs);
+    document.getElementById('flBv').textContent = fmtDur(live.breakMs >= REQ_BREAK_MS ? live.breakMs : bRem);
+    document.getElementById('flBl').textContent = live.breakMs >= REQ_BREAK_MS ? 'PAUSE ✓' : 'PAUSE OM';
+    document.getElementById('flBm').textContent = live.breakMs >= REQ_BREAK_MS ? '45 MIN OK' : 'MANGLER';
+    bEl.className = 'flabel ' + (live.breakMs >= REQ_BREAK_MS ? 'grn' : 'yel');
+    // Toast when pause qualifies
+    if (live.breakMs >= REQ_BREAK_MS && !S.toastedOk) {
+      S.toastedOk = true;
+      toast('✓ PAUSE GODKENDT — 45 MIN AFHOLDT!', 'ok');
+      document.getElementById('hpLed').className = 'hp-led ok';
+      setStatus('ok', 'PAUSE GODKENDT ✓ — KLAR TIL KØRSEL');
+    }
+  } else if (S.mode === 'hvil') {
+    const hTime = live.breakMs;
+    const hRem  = Math.max(0, 11 * 3600000 - hTime);
+    document.getElementById('flBv').textContent = fmtDur(hTime);
+    document.getElementById('flBl').textContent = hTime >= 11 * 3600000 ? 'HVIL OK ✓' : 'HVIL';
+    document.getElementById('flBm').textContent = hTime >= 11 * 3600000 ? 'NY DAG KLAR' : fmtDur(hRem) + ' REST';
+    bEl.className = 'flabel ' + (hTime >= 11 * 3600000 ? 'grn' : 'cya');
+  } else {
+    document.getElementById('flBv').textContent = S.breakMs >= REQ_BREAK_MS ? '✓' : '--:--';
+    document.getElementById('flBl').textContent = 'PAUSE';
+    document.getElementById('flBm').textContent = 'BEHOV 45 MIN';
+    bEl.className = 'flabel ' + (S.breakMs >= REQ_BREAK_MS ? 'grn dim' : 'dim');
+  }
+
+  // ── Rules bar ──
+  const rcKv = document.getElementById('rcKv');
+  const rcDv = document.getElementById('rcDv');
+  const rcBv = document.getElementById('rcBv');
+  const rcK  = document.getElementById('rcK');
+  const rcD  = document.getElementById('rcD');
+  const rcB  = document.getElementById('rcB');
+
+  rcKv.textContent = fmtDur(Math.max(0, MAX_CONT_MS - live.contMs));
+  rcDv.textContent = fmtDur(Math.max(0, maxD - live.dailyMs));
+
+  const bLeft = S.mode === 'pause' ? Math.max(0, REQ_BREAK_MS - live.breakMs) : REQ_BREAK_MS;
+  rcBv.textContent = S.mode === 'pause'
+    ? (live.breakMs >= REQ_BREAK_MS ? '✓ OK' : fmtDur(bLeft) + ' REST')
+    : '0:45 KRÆVET';
+
+  rcK.className  = 'rule-cell' + (live.contMs >= MAX_CONT_MS ? ' alert-cell' : live.contMs >= WARN_CONT_MS ? ' warn-cell' : '');
+  rcD.className  = 'rule-cell' + (live.dailyMs >= maxD ? ' alert-cell' : live.dailyMs >= WARN_DAILY_MS ? ' warn-cell' : '');
+  rcB.className  = 'rule-cell' + (S.mode === 'pause' && live.breakMs >= REQ_BREAK_MS ? '' : '');
+}
+
+function setLabelPos(id, angle, rPct) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.style.left = (50 + Math.cos(angle) * rPct) + '%';
+  el.style.top  = (50 + Math.sin(angle) * rPct) + '%';
+}
+
+// ════════════════════════════════════════════
+//  DRAW
+// ════════════════════════════════════════════
+function draw(live) {
+  if (!live) live = getLive();
+  const now = live.now || Date.now();
+
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  ctx.shadowBlur = 0; ctx.shadowColor = 'transparent';
+  ctx.globalAlpha = 1;
+  ctx.clearRect(0, 0, W, H);
+
+  // Face fill
+  ctx.beginPath(); ctx.arc(CX, CY, R, 0, PI2);
+  ctx.fillStyle = '#040507'; ctx.fill();
+  const sh = ctx.createRadialGradient(CX, CY, 0, CX, CY, R);
+  sh.addColorStop(0, 'rgba(255,255,255,0.018)'); sh.addColorStop(1, 'rgba(0,0,0,0.45)');
+  ctx.beginPath(); ctx.arc(CX, CY, R, 0, PI2);
+  ctx.fillStyle = sh; ctx.fill();
+
+  const running = S.mode === 'kørsel';
+  const pausing = S.mode === 'pause';
+  const pulse   = running ? (Math.sin(S.phase) * 0.5 + 0.5) : 0;
+  const maxD    = S.maxDailyMs;
+
+  // ── INNER RING — Continuous drive OR break progress ──
+  const IR  = CX * 0.895;
+  const IRW = CX * 0.060;
+  const startA = -hPI; // 12 o'clock
+
+  // Background track
+  ctx.save(); ctx.beginPath(); ctx.arc(CX, CY, IR, 0, PI2);
+  ctx.strokeStyle = 'rgba(3, 4, 8, 0.96)'; ctx.lineWidth = IRW + 4; ctx.stroke(); ctx.restore();
+
+  if (pausing && live.breakMs > 0) {
+    // ── Show BREAK progress (CYAN) on inner ring ──
+    const bPct  = Math.min(1, live.breakMs / REQ_BREAK_MS);
+    const bEnd  = startA + PI2 * bPct;
+    const bQual = live.breakMs >= REQ_BREAK_MS;
+
+    // Ghost
+    ctx.save(); ctx.beginPath(); ctx.arc(CX, CY, IR, startA, startA + PI2);
+    ctx.strokeStyle = bQual ? 'rgba(0,220,80,0.15)' : 'rgba(34,200,180,0.15)';
+    ctx.lineWidth = IRW; ctx.stroke(); ctx.restore();
+
+    // Core
+    for (let i = 0; i < 36; i++) {
+      const t = (i + 1) / 36;
+      ctx.save(); ctx.beginPath();
+      ctx.arc(CX, CY, IR, startA + PI2 * bPct * (i / 36), startA + PI2 * bPct * t);
+      if (bQual) ctx.strokeStyle = `rgba(0,${Math.round(160+t*80)},${Math.round(t*50)},${0.6+t*0.4})`;
+      else       ctx.strokeStyle = `rgba(0,${Math.round(120+t*100)},${Math.round(100+t*80)},${0.55+t*0.45})`;
+      ctx.lineWidth = IRW;
+      ctx.shadowColor = bQual ? '#00ee55' : '#22ddcc';
+      ctx.shadowBlur  = 4 + t * 10; ctx.stroke(); ctx.shadowBlur = 0; ctx.restore();
+    }
+    // Tick at 45 min mark
+    ctx.save(); ctx.translate(CX, CY); ctx.rotate(startA + PI2);
+    ctx.beginPath(); ctx.moveTo(IR - IRW * 0.6, 0); ctx.lineTo(IR + IRW * 0.5, 0);
+    ctx.strokeStyle = 'rgba(255,255,255,0.2)'; ctx.lineWidth = 1.5; ctx.stroke(); ctx.restore();
+
+  } else {
+    // ── Show CONTINUOUS DRIVE progress (BLUE→YELLOW→RED) ──
+    const contPct = Math.min(1, live.contMs / MAX_CONT_MS);
+    const contEnd = startA + PI2 * contPct;
+    const isRed   = live.contMs >= MAX_CONT_MS;
+    const isYel   = !isRed && live.contMs >= WARN_CONT_MS;
+
+    // Ghost track
+    ctx.save(); ctx.beginPath(); ctx.arc(CX, CY, IR, startA, startA + PI2);
+    ctx.strokeStyle = isRed ? 'rgba(200,20,20,0.2)' : isYel ? 'rgba(220,150,0,0.18)' : 'rgba(34,140,220,0.14)';
+    ctx.lineWidth = IRW; ctx.stroke(); ctx.restore();
+
+    if (contPct > 0.002) {
+      const span = PI2 * contPct;
+      // Glow
+      ctx.save(); ctx.beginPath(); ctx.arc(CX, CY, IR, startA, contEnd);
+      ctx.strokeStyle = isRed
+        ? `rgba(255,30,30,${0.4 + pulse * 0.15})`
+        : isYel ? `rgba(255,160,0,${0.35 + pulse * 0.1})`
+        : `rgba(34,160,240,${0.35 + pulse * 0.1})`;
+      ctx.lineWidth = IRW + CX * 0.022; ctx.stroke(); ctx.restore();
+
+      for (let i = 0; i < 40; i++) {
+        const t = (i + 1) / 40;
+        ctx.save(); ctx.beginPath();
+        ctx.arc(CX, CY, IR, startA + span * (i / 40), startA + span * t);
+        if (isRed)      ctx.strokeStyle = `rgba(${Math.round(100+t*155)},${Math.round(t*25)},0,${0.6+t*0.4})`;
+        else if (isYel) ctx.strokeStyle = `rgba(${Math.round(100+t*140)},${Math.round(60+t*110)},0,${0.6+t*0.4})`;
+        else            ctx.strokeStyle = `rgba(0,${Math.round(80+t*90)},${Math.round(120+t*120)},${0.6+t*0.4})`;
+        ctx.lineWidth  = IRW;
+        ctx.shadowColor = isRed ? '#ff2020' : isYel ? '#ffaa00' : '#22aaff';
+        ctx.shadowBlur  = running ? (3 + t * 10 + pulse * 4) : t * 4;
+        ctx.stroke(); ctx.shadowBlur = 0; ctx.restore();
+      }
+      // Leading dot
+      if (running && contPct < 1) {
+        ctx.save(); ctx.beginPath(); ctx.arc(CX, CY, IR, contEnd - 0.04, contEnd + 0.01);
+        ctx.strokeStyle = isRed ? `rgba(255,140,140,0.92)` : isYel ? `rgba(255,210,90,0.92)` : `rgba(140,210,255,0.92)`;
+        ctx.lineWidth   = IRW + CX * 0.016; ctx.lineCap = 'round';
+        ctx.shadowColor = isRed ? '#ff2020' : isYel ? '#ffaa00' : '#22aaff';
+        ctx.shadowBlur  = 18 + pulse * 8; ctx.stroke(); ctx.shadowBlur = 0; ctx.restore();
+      }
+    }
+
+    // Warning markers at 4h and 4.5h
+    const a4h = startA + PI2 * (4 / 4.5);
+    drawTick(IR, a4h, IRW, 'rgba(255,200,0,0.5)', 1.5);
+  }
+
+  // ── OUTER RING — Daily drive (0 to 9h or 10h) ──
+  const OR  = CX * 0.955;
+  const ORW = CX * 0.056;
+  const dailyPct = Math.min(1, live.dailyMs / maxD);
+  const dailyEnd = startA + PI2 * dailyPct;
+  const isDailyRed = live.dailyMs >= maxD;
+  const isDailyYel = !isDailyRed && live.dailyMs >= WARN_DAILY_MS;
+
+  ctx.save(); ctx.beginPath(); ctx.arc(CX, CY, OR, 0, PI2);
+  ctx.strokeStyle = 'rgba(2,4,3,0.96)'; ctx.lineWidth = ORW + 4; ctx.stroke(); ctx.restore();
+
+  // Ghost
+  ctx.save(); ctx.beginPath(); ctx.arc(CX, CY, OR, startA, startA + PI2);
+  ctx.strokeStyle = isDailyRed ? 'rgba(200,20,20,0.18)' : isDailyYel ? 'rgba(200,120,0,0.15)' : 'rgba(0,180,70,0.13)';
+  ctx.lineWidth = ORW; ctx.stroke(); ctx.restore();
+
+  // Warning at 8h
+  const a8h = startA + PI2 * (8 / (maxD / 3600000));
+  drawTick(OR, a8h, ORW, 'rgba(255,180,0,0.5)', 1.5);
+
+  if (dailyPct > 0.002) {
+    const span = PI2 * dailyPct;
+    ctx.save(); ctx.beginPath(); ctx.arc(CX, CY, OR, startA, dailyEnd);
+    ctx.strokeStyle = isDailyRed
+      ? `rgba(255,30,30,${0.38 + pulse * 0.12})`
+      : isDailyYel ? `rgba(255,130,0,${0.33 + pulse * 0.1})`
+      : `rgba(0,200,70,${0.33 + pulse * 0.1})`;
+    ctx.lineWidth = ORW + CX * 0.022; ctx.stroke(); ctx.restore();
+
+    for (let i = 0; i < 50; i++) {
+      const t = (i + 1) / 50;
+      ctx.save(); ctx.beginPath();
+      ctx.arc(CX, CY, OR, startA + span * (i / 50), startA + span * t);
+      if (isDailyRed)      ctx.strokeStyle = `rgba(${Math.round(100+t*155)},${Math.round(t*25)},0,${0.6+t*0.4})`;
+      else if (isDailyYel) ctx.strokeStyle = `rgba(${Math.round(120+t*130)},${Math.round(50+t*100)},0,${0.6+t*0.4})`;
+      else                 ctx.strokeStyle = `rgba(0,${Math.round(100+t*155)},${Math.round(t*50)},${0.55+t*0.45})`;
+      ctx.lineWidth   = ORW;
+      ctx.shadowColor = isDailyRed ? '#ff2020' : isDailyYel ? '#ff8800' : '#00ee55';
+      ctx.shadowBlur  = running ? (3 + t * 11 + pulse * 5) : t * 5;
+      ctx.stroke(); ctx.shadowBlur = 0; ctx.restore();
+    }
+    if (running && dailyPct < 1) {
+      ctx.save(); ctx.beginPath(); ctx.arc(CX, CY, OR, dailyEnd - 0.04, dailyEnd + 0.01);
+      ctx.strokeStyle = isDailyRed ? 'rgba(255,140,140,0.9)' : isDailyYel ? 'rgba(255,180,80,0.9)' : 'rgba(160,255,180,0.9)';
+      ctx.lineWidth   = ORW + CX * 0.016; ctx.lineCap = 'round';
+      ctx.shadowColor = isDailyRed ? '#ff2020' : isDailyYel ? '#ff8800' : '#00ee55';
+      ctx.shadowBlur  = 18 + pulse * 8; ctx.stroke(); ctx.shadowBlur = 0; ctx.restore();
+    }
+  }
+
+  // ── DAY START TRIANGLE MARKERS ──
+  if (S.dayStart) {
+    const dsA  = -hPI; // 12 o'clock = start of both arcs
+    const triW = ORW * 0.55;
+
+    // Outer ring triangle
+    ctx.save(); ctx.translate(CX, CY); ctx.rotate(dsA);
+    ctx.beginPath();
+    ctx.moveTo(OR + ORW * 0.55, 0);
+    ctx.lineTo(OR - ORW * 0.42, -triW);
+    ctx.lineTo(OR - ORW * 0.42,  triW);
+    ctx.closePath();
+    ctx.fillStyle = '#ffffff';
+    ctx.shadowColor = '#ffffff'; ctx.shadowBlur = running ? 12 : 6;
+    ctx.fill(); ctx.shadowBlur = 0; ctx.restore();
+
+    // Inner ring triangle (slightly smaller)
+    ctx.save(); ctx.translate(CX, CY); ctx.rotate(dsA);
+    ctx.beginPath();
+    ctx.moveTo(IR + IRW * 0.55, 0);
+    ctx.lineTo(IR - IRW * 0.42, -triW * 0.75);
+    ctx.lineTo(IR - IRW * 0.42,  triW * 0.75);
+    ctx.closePath();
+    ctx.fillStyle = 'rgba(200,225,255,0.6)';
+    ctx.shadowColor = '#ffffff'; ctx.shadowBlur = 4;
+    ctx.fill(); ctx.shadowBlur = 0; ctx.restore();
+
+    // DAGSTART time text — just outside the outer ring at 12 o'clock
+    const textR = OR + ORW * 0.7;
+    const tx = CX + Math.cos(dsA) * textR;
+    const ty = CY + Math.sin(dsA) * textR;
+    ctx.save();
+    ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
+    ctx.font = `bold ${Math.max(7, R * 0.052)}px Orbitron,sans-serif`;
+    ctx.fillStyle = 'rgba(220,235,255,0.85)';
+    ctx.shadowColor = '#ffffff'; ctx.shadowBlur = 5;
+    ctx.fillText(fmtClock(S.dayStart), tx, ty - 2);
+    ctx.font = `${Math.max(5, R * 0.036)}px Share Tech Mono,monospace`;
+    ctx.fillStyle = 'rgba(160,190,230,0.55)';
+    ctx.shadowBlur = 0;
+    ctx.textBaseline = 'top';
+    ctx.fillText('DAGSTART', tx, ty + 2);
+    ctx.restore();
+  }
+
+  // ── CLOCK FACE: ticks and numbers ──
+  const tickFont = Math.max(6, R * 0.048);
+  const majFont  = Math.max(8, R * 0.092);
+
+  for (let i = 0; i < 60; i++) {
+    const a = (i / 60) * PI2 - hPI;
+    const is15 = i % 15 === 0, is5 = i % 5 === 0;
+    ctx.save(); ctx.beginPath();
+    ctx.moveTo(CX + Math.cos(a) * (is15 ? R * 0.62 : is5 ? R * 0.70 : R * 0.79),
+               CY + Math.sin(a) * (is15 ? R * 0.62 : is5 ? R * 0.70 : R * 0.79));
+    ctx.lineTo(CX + Math.cos(a) * R * 0.87, CY + Math.sin(a) * R * 0.87);
+    ctx.strokeStyle = is15 ? '#e8e8e8' : is5 ? '#aaaaaa' : '#404040';
+    ctx.lineWidth   = is15 ? 2.5 : is5 ? 1.5 : 0.8;
+    ctx.stroke(); ctx.restore();
+  }
+
+  ctx.save(); ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  for (let h = 1; h <= 12; h++) {
+    const a = (h / 12) * PI2 - hPI;
+    const isMaj = h % 3 === 0;
+    ctx.font = isMaj
+      ? `bold ${majFont}px Orbitron,sans-serif`
+      : `bold ${tickFont}px Orbitron,sans-serif`;
+    ctx.fillStyle = isMaj ? '#dddddd' : '#777';
+    if (isMaj) { ctx.shadowColor = 'rgba(255,255,255,0.18)'; ctx.shadowBlur = 4; }
+    ctx.fillText(String(h), CX + Math.cos(a) * R * 0.55, CY + Math.sin(a) * R * 0.55);
+    ctx.shadowBlur = 0;
+  }
+  ctx.restore();
+
+  // Face rim
+  ctx.save(); ctx.beginPath(); ctx.arc(CX, CY, R, 0, PI2);
+  ctx.strokeStyle = '#20262e'; ctx.lineWidth = 1.5; ctx.stroke(); ctx.restore();
+
+  // ── Clock hands ──
+  const d  = new Date(now);
+  const hr = d.getHours() % 12 + d.getMinutes() / 60;
+  const mn = d.getMinutes() + d.getSeconds() / 60;
+  const sc = d.getSeconds() + d.getMilliseconds() / 1000;
+
+  // Hour
+  ctx.save(); ctx.translate(CX, CY); ctx.rotate(hr / 12 * PI2 - hPI);
+  ctx.beginPath(); ctx.moveTo(-R * 0.08, 0); ctx.lineTo(R * 0.38, 0);
+  ctx.strokeStyle = '#eeeeee'; ctx.lineWidth = 3; ctx.lineCap = 'round'; ctx.stroke(); ctx.restore();
+  // Minute
+  ctx.save(); ctx.translate(CX, CY); ctx.rotate(mn / 60 * PI2 - hPI);
+  ctx.beginPath(); ctx.moveTo(-R * 0.10, 0); ctx.lineTo(R * 0.52, 0);
+  ctx.strokeStyle = '#cccccc'; ctx.lineWidth = 2; ctx.lineCap = 'round'; ctx.stroke(); ctx.restore();
+  // Second
+  ctx.save(); ctx.translate(CX, CY); ctx.rotate(sc / 60 * PI2 - hPI);
+  ctx.beginPath(); ctx.moveTo(-R * 0.15, 0); ctx.lineTo(R * 0.56, 0);
+  ctx.strokeStyle = '#22aaff'; ctx.lineWidth = 1.2; ctx.lineCap = 'round';
+  ctx.shadowColor = '#22aaff'; ctx.shadowBlur = running ? 8 : 3; ctx.stroke(); ctx.shadowBlur = 0; ctx.restore();
+  // Center
+  ctx.save(); ctx.beginPath(); ctx.arc(CX, CY, R * 0.028, 0, PI2);
+  ctx.fillStyle = '#22aaff'; ctx.shadowColor = '#22aaff';
+  ctx.shadowBlur = running ? 10 : 4; ctx.fill(); ctx.shadowBlur = 0; ctx.restore();
+
+  // ── Label positions ──
+  const fPct = (R / W) * 100 * 0.79;
+  setLabelPos('flK', -hPI,         fPct * 0.52);  // 12
+  setLabelPos('flR',  0,           fPct * 0.62);  // 3
+  setLabelPos('flD',  Math.PI / 2, fPct * 0.52);  // 6
+  setLabelPos('flB',  Math.PI,     fPct * 0.62);  // 9
+}
+
+function drawTick(r, angle, w, color, lineW) {
+  ctx.save(); ctx.translate(CX, CY); ctx.rotate(angle);
+  ctx.beginPath();
+  ctx.moveTo(r - w * 0.55, 0); ctx.lineTo(r + w * 0.55, 0);
+  ctx.strokeStyle = color; ctx.lineWidth = lineW; ctx.stroke();
+  ctx.restore();
+}
+
+// ════════════════════════════════════════════
+//  UI HELPERS
+// ════════════════════════════════════════════
+function activateLabels() {
+  ['flK', 'flR', 'flD', 'flB', 'flN'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) { el.classList.remove('dim'); el.classList.add('flash'); setTimeout(() => el.classList.remove('flash'), 900); }
+  });
+}
+
+function updateButtons() {
+  const obK = document.getElementById('obK');
+  const obP = document.getElementById('obP');
+  const obH = document.getElementById('obH');
+  const obA = document.getElementById('obA');
+  obK.className = 'obutton ob-top' + (S.mode === 'kørsel' ? ' ob-driving' : '');
+  obP.className = 'obutton ob-tr'  + (S.mode === 'pause'  ? ' ob-pausing' : '');
+  obH.className = 'obutton ob-br'  + (S.mode === 'hvil'   ? ' ob-resting' : '');
+  obA.className = 'obutton ob-bl'  + (S.mode === 'andet'  ? ' ob-working' : '');
+  document.getElementById('lblK').textContent = S.mode === 'kørsel' ? 'KØRER' : 'KØRSEL';
+}
+
+function setStatus(cls, txt) {
+  document.getElementById('sbTxt').textContent = txt;
+  document.getElementById('sbTxt').className = 'sb-txt' + (cls ? ' ' + cls : '');
+  document.getElementById('sbL1').className = 'sb-led' + (cls ? ' ' + cls : '');
+  document.getElementById('sbL2').className = 'sb-led' + (cls ? ' ' + cls : '');
+}
+
+let toastTimer;
+function toast(msg, type) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className   = 'toast' + (type && type !== 'info' ? ' ' + type : '');
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), type === 'alert' ? 6000 : 4000);
+}
+
+function showLog() {
+  const live = getLive();
+  const maxD = S.maxDailyMs;
+  const lines = [
+    'MODE: ' + S.mode.toUpperCase(),
+    'KONT: ' + fmtDurFull(live.contMs) + ' / MAX 4:30:00',
+    'DAGLIG: ' + fmtDurFull(live.dailyMs) + ' / MAX ' + (S.extendedDay ? '10:00:00' : '9:00:00'),
+    'PAUSE: ' + fmtDurFull(live.breakMs),
+  ];
+  toast(lines[1] + ' · ' + lines[2], 'info');
+}
+
+// ════════════════════════════════════════════
+//  SETTINGS
+// ════════════════════════════════════════════
+let settingsOpen = false;
+function toggleSettings() {
+  settingsOpen = !settingsOpen;
+  document.getElementById('settingsDrawer').classList.toggle('open', settingsOpen);
+}
+
+function toggleExt(e) {
+  e.stopPropagation();
+  S.extendedDay = !S.extendedDay;
+  S.maxDailyMs  = S.extendedDay ? MAX_DAILY_EXT : MAX_DAILY_STD;
+  document.getElementById('extBtn').classList.toggle('on', S.extendedDay);
+  document.getElementById('s9').classList.toggle('on', !S.extendedDay);
+  document.getElementById('s10').classList.toggle('on', S.extendedDay);
+  toast(S.extendedDay ? '10T UDVIDET DAG AKTIVERET' : '9T STANDARD DAG', 'info');
+  draw(getLive());
+}
+
+function setMaxDay(h) {
+  S.extendedDay = (h === 10);
+  S.maxDailyMs  = h * 3600000;
+  document.getElementById('extBtn').classList.toggle('on', S.extendedDay);
+  document.getElementById('s9').classList.toggle('on', !S.extendedDay);
+  document.getElementById('s10').classList.toggle('on', S.extendedDay);
+}
+
+function resetAll() {
+  if (S.iv) { clearInterval(S.iv); S.iv = null; }
+  S = {
+    mode: 'hvil', modeStart: null,
+    maxDailyMs: S.maxDailyMs, extendedDay: S.extendedDay,
+    contDriveMs: 0, contDriveSegStart: null,
+    breakMs: 0, breakSegStart: null,
+    dailyDriveMs: 0, dailyDriveSegStart: null, dayStart: null,
+    andetMs: 0, andetSegStart: null,
+    warned30: false, warnedStop: false, warned8h: false, warnedDay: false, toastedOk: false,
+    phase: 0, iv: null, segments: [],
+  };
+  document.getElementById('hpLed').className = 'hp-led';
+  setStatus('', 'TRYK KØRSEL FOR AT STARTE');
+  ['flK','flR','flD','flB'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.className = 'flabel dim';
+  });
+  updateButtons();
+  draw(getLive());
+  toast('↺ NULSTILLET', 'info');
+}
+
+// ════════════════════════════════════════════
+//  IDLE LOOP + RESIZE + INIT
+// ════════════════════════════════════════════
+setInterval(() => {
+  if (S.mode !== 'kørsel') {
+    const live = getLive();
+    refreshLabels(live);
+    draw(live);
+  }
+}, 200);
+
+window.addEventListener('resize', () => { resizeCanvas(); draw(getLive()); });
+
+function init() {
+  resizeCanvas();
+  setStatus('', 'TRYK KØRSEL FOR AT STARTE');
+  updateButtons();
+  draw(getLive());
+}
+if (document.readyState === 'complete') init();
+else window.addEventListener('load', init);
+</script>
+</body>
+</html>
