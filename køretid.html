@@ -69,7 +69,7 @@ body{
 /* Orbital buttons */
 .obutton{
   position:absolute;
-  width:min(54px,14vw);height:min(54px,14vw);
+  width:min(66px,17vw);height:min(66px,17vw);
   border-radius:50%;
   background:radial-gradient(circle at 40% 30%,#171c24,#0a0d12);
   border:2px solid #22283200;color:#283040;
@@ -88,8 +88,8 @@ body{
 .ob-pausing{background:radial-gradient(circle at 40% 30%,#443300,#221800);border-color:#ffcc00;color:#fff0aa;box-shadow:0 0 22px rgba(255,200,0,0.5),0 4px 12px rgba(0,0,0,0.8)}
 .ob-resting{background:radial-gradient(circle at 40% 30%,#002240,#001020);border-color:#3388bb;color:#88ccee;box-shadow:0 0 16px rgba(50,150,200,0.4),0 4px 12px rgba(0,0,0,0.8)}
 .ob-working{background:radial-gradient(circle at 40% 30%,#1a2810,#0e1608);border-color:#558833;color:#aaccaa;box-shadow:0 0 16px rgba(80,150,40,0.35),0 4px 12px rgba(0,0,0,0.8)}
-.ob-icon{font-size:min(1.05rem,3.7vw);line-height:1;display:flex;align-items:center;justify-content:center}
-.ob-lbl{font-size:min(0.37rem,1.3vw);letter-spacing:0.04em;margin-top:2px}
+.ob-icon{font-size:min(1.65rem,5.8vw);line-height:1;display:flex;align-items:center;justify-content:center}
+.ob-lbl{font-size:min(0.42rem,1.5vw);letter-spacing:0.04em;margin-top:3px}
 .ob-top{top:0;left:50%;transform:translateX(-50%)}
 .ob-tr{top:18%;right:0}
 .ob-br{bottom:18%;right:0}
@@ -948,12 +948,12 @@ function draw(live) {
     ctx.fill();
     ctx.shadowBlur = 0; ctx.restore();
   }
-  // Hour — thick white
-  drawHand(hr / 12 * PI2 - hPI, R * 0.38, R * 0.09, 9, '#ffffff', '#ddeeff', running ? 18 : 7);
-  // Minute — medium white
-  drawHand(mn / 60 * PI2 - hPI, R * 0.52, R * 0.11, 6, '#ddddee', '#c8d0e0', running ? 11 : 4);
-  // Second — red
-  drawHand(sc / 60 * PI2 - hPI, R * 0.58, R * 0.16, 2.5, '#ff2200', '#ff2200', running ? 14 : 5);
+  // Hour — white, longer
+  drawHand(hr / 12 * PI2 - hPI, R * 0.46, R * 0.10, 7, '#ffffff', '#ddeeff', running ? 18 : 7);
+  // Minute — white, long
+  drawHand(mn / 60 * PI2 - hPI, R * 0.62, R * 0.12, 4.5, '#ddddee', '#c8d0e0', running ? 11 : 4);
+  // Second — red, longest
+  drawHand(sc / 60 * PI2 - hPI, R * 0.68, R * 0.17, 2, '#ff2200', '#ff2200', running ? 14 : 5);
   // Center cap — red
   ctx.save(); ctx.beginPath(); ctx.arc(CX, CY, R * 0.038, 0, PI2);
   ctx.fillStyle = '#ff2200'; ctx.shadowColor = '#ff2200';
