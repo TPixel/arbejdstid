@@ -926,23 +926,38 @@ function draw(live) {
   const mn = d.getMinutes() + d.getSeconds() / 60;
   const sc = d.getSeconds() + d.getMilliseconds() / 1000;
 
-  // Hour
-  ctx.save(); ctx.translate(CX, CY); ctx.rotate(hr / 12 * PI2 - hPI);
-  ctx.beginPath(); ctx.moveTo(-R * 0.08, 0); ctx.lineTo(R * 0.38, 0);
-  ctx.strokeStyle = '#eeeeee'; ctx.lineWidth = 3; ctx.lineCap = 'round'; ctx.stroke(); ctx.restore();
-  // Minute
-  ctx.save(); ctx.translate(CX, CY); ctx.rotate(mn / 60 * PI2 - hPI);
-  ctx.beginPath(); ctx.moveTo(-R * 0.10, 0); ctx.lineTo(R * 0.52, 0);
-  ctx.strokeStyle = '#cccccc'; ctx.lineWidth = 2; ctx.lineCap = 'round'; ctx.stroke(); ctx.restore();
-  // Second
-  ctx.save(); ctx.translate(CX, CY); ctx.rotate(sc / 60 * PI2 - hPI);
-  ctx.beginPath(); ctx.moveTo(-R * 0.15, 0); ctx.lineTo(R * 0.56, 0);
-  ctx.strokeStyle = '#22aaff'; ctx.lineWidth = 1.2; ctx.lineCap = 'round';
-  ctx.shadowColor = '#22aaff'; ctx.shadowBlur = running ? 8 : 3; ctx.stroke(); ctx.shadowBlur = 0; ctx.restore();
-  // Center
-  ctx.save(); ctx.beginPath(); ctx.arc(CX, CY, R * 0.028, 0, PI2);
-  ctx.fillStyle = '#22aaff'; ctx.shadowColor = '#22aaff';
-  ctx.shadowBlur = running ? 10 : 4; ctx.fill(); ctx.shadowBlur = 0; ctx.restore();
+  // ── Arrow hands helper ──
+  function drawHand(angle, tipR, tailR, w, color, glow, glowBlur) {
+    const hw = w / 2;
+    const arrLen = tipR * 0.22;
+    const arrW   = w * 1.9;
+    const shaftEnd = tipR - arrLen;
+    ctx.save();
+    ctx.translate(CX, CY); ctx.rotate(angle);
+    ctx.beginPath();
+    ctx.moveTo(-tailR,   hw);
+    ctx.lineTo(shaftEnd, hw);
+    ctx.lineTo(shaftEnd, arrW);
+    ctx.lineTo(tipR,     0);
+    ctx.lineTo(shaftEnd, -arrW);
+    ctx.lineTo(shaftEnd, -hw);
+    ctx.lineTo(-tailR,   -hw);
+    ctx.closePath();
+    if (glow) { ctx.shadowColor = glow; ctx.shadowBlur = glowBlur; }
+    ctx.fillStyle = color;
+    ctx.fill();
+    ctx.shadowBlur = 0; ctx.restore();
+  }
+  // Hour — thick white
+  drawHand(hr / 12 * PI2 - hPI, R * 0.38, R * 0.09, 9, '#ffffff', '#ddeeff', running ? 18 : 7);
+  // Minute — medium white
+  drawHand(mn / 60 * PI2 - hPI, R * 0.52, R * 0.11, 6, '#ddddee', '#c8d0e0', running ? 11 : 4);
+  // Second — red
+  drawHand(sc / 60 * PI2 - hPI, R * 0.58, R * 0.16, 2.5, '#ff2200', '#ff2200', running ? 14 : 5);
+  // Center cap — red
+  ctx.save(); ctx.beginPath(); ctx.arc(CX, CY, R * 0.038, 0, PI2);
+  ctx.fillStyle = '#ff2200'; ctx.shadowColor = '#ff2200';
+  ctx.shadowBlur = running ? 12 : 5; ctx.fill(); ctx.shadowBlur = 0; ctx.restore();
 
   // ── Label positions ──
   const fPct = (R / W) * 100 * 0.79;
