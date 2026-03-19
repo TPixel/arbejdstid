@@ -796,49 +796,50 @@ function draw(live) {
     }
   }
 
-  // ── DAY START TRIANGLE MARKERS ──
-  if (S.dayStart) {
-    const dsA  = -hPI; // 12 o'clock = start of both arcs
-    const triW = ORW * 0.55;
+  // ── DAY START MARKER — altimeter-style bold pointer at 12 o'clock ──
+  {
+    const dsA    = -hPI;
+    const active = !!S.dayStart;
+    // Big knife-pointer sitting across both arc rings from outside inward
+    const pTip   = OR + ORW * 0.72;          // tip: just outside outer ring
+    const pBase  = IR - IRW * 0.72;          // base: just inside inner ring
+    const pHW    = (OR - IR + ORW * 0.5 + IRW * 0.5) * 0.52; // half-width at base
+    const col    = active ? '#00ee55' : 'rgba(255,255,255,0.18)';
+    const glow   = active ? '#00ee55' : 'transparent';
 
-    // Outer ring triangle
     ctx.save(); ctx.translate(CX, CY); ctx.rotate(dsA);
     ctx.beginPath();
-    ctx.moveTo(OR + ORW * 0.55, 0);
-    ctx.lineTo(OR - ORW * 0.42, -triW);
-    ctx.lineTo(OR - ORW * 0.42,  triW);
+    ctx.moveTo(pTip,   0);          // sharp tip pointing outward
+    ctx.lineTo(pBase, -pHW);        // base left
+    ctx.lineTo(pBase,  pHW);        // base right
     ctx.closePath();
-    ctx.fillStyle = '#ffffff';
-    ctx.shadowColor = '#ffffff'; ctx.shadowBlur = running ? 12 : 6;
+    ctx.fillStyle = col;
+    if (active) { ctx.shadowColor = glow; ctx.shadowBlur = running ? 20 : 10; }
     ctx.fill(); ctx.shadowBlur = 0; ctx.restore();
 
-    // Inner ring triangle (slightly smaller)
+    // White border line to separate from arcs
     ctx.save(); ctx.translate(CX, CY); ctx.rotate(dsA);
     ctx.beginPath();
-    ctx.moveTo(IR + IRW * 0.55, 0);
-    ctx.lineTo(IR - IRW * 0.42, -triW * 0.75);
-    ctx.lineTo(IR - IRW * 0.42,  triW * 0.75);
+    ctx.moveTo(pTip,   0);
+    ctx.lineTo(pBase, -pHW);
+    ctx.lineTo(pBase,  pHW);
     ctx.closePath();
-    ctx.fillStyle = 'rgba(200,225,255,0.6)';
-    ctx.shadowColor = '#ffffff'; ctx.shadowBlur = 4;
-    ctx.fill(); ctx.shadowBlur = 0; ctx.restore();
+    ctx.strokeStyle = active ? 'rgba(255,255,255,0.55)' : 'rgba(255,255,255,0.08)';
+    ctx.lineWidth = 1; ctx.stroke(); ctx.restore();
 
-    // DAGSTART time text — just outside the outer ring at 12 o'clock
-    const textR = OR + ORW * 0.7;
-    const tx = CX + Math.cos(dsA) * textR;
-    const ty = CY + Math.sin(dsA) * textR;
-    ctx.save();
-    ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
-    ctx.font = `bold ${Math.max(7, R * 0.052)}px Orbitron,sans-serif`;
-    ctx.fillStyle = 'rgba(220,235,255,0.85)';
-    ctx.shadowColor = '#ffffff'; ctx.shadowBlur = 5;
-    ctx.fillText(fmtClock(S.dayStart), tx, ty - 2);
-    ctx.font = `${Math.max(5, R * 0.036)}px Share Tech Mono,monospace`;
-    ctx.fillStyle = 'rgba(160,190,230,0.55)';
-    ctx.shadowBlur = 0;
-    ctx.textBaseline = 'top';
-    ctx.fillText('DAGSTART', tx, ty + 2);
-    ctx.restore();
+    // Time label inside the face just below 12
+    if (active) {
+      const lR  = R * 0.88;
+      const tx  = CX + Math.cos(dsA) * lR;
+      const ty  = CY + Math.sin(dsA) * lR;
+      ctx.save();
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.font = `700 ${Math.max(9, R * 0.075)}px Orbitron,sans-serif`;
+      ctx.fillStyle = '#00ee55';
+      ctx.shadowColor = '#00ee55'; ctx.shadowBlur = 8;
+      ctx.fillText(fmtClock(S.dayStart), tx, ty);
+      ctx.shadowBlur = 0; ctx.restore();
+    }
   }
 
   // ── CLOCK FACE: Altimeter-style tick ring ON the face (R-coords) ──
