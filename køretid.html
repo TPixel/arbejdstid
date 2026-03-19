@@ -642,19 +642,18 @@ function draw(live) {
   ctx.globalAlpha = 1;
   ctx.clearRect(0, 0, W, H);
 
-  // Face fill — slightly lighter so circle shape reads clearly
+  // Face fill — matte black, altimeter style
   ctx.beginPath(); ctx.arc(CX, CY, R, 0, PI2);
-  ctx.fillStyle = '#111418'; ctx.fill();
-  const sh = ctx.createRadialGradient(CX, CY, R * 0.3, CX, CY, R);
-  sh.addColorStop(0, 'rgba(255,255,255,0.025)');
-  sh.addColorStop(0.75, 'rgba(0,0,0,0.0)');
-  sh.addColorStop(1,    'rgba(0,0,0,0.55)');
+  ctx.fillStyle = '#080a0c'; ctx.fill();
+  const sh = ctx.createRadialGradient(CX, CY, R * 0.45, CX, CY, R);
+  sh.addColorStop(0, 'rgba(0,0,0,0)');
+  sh.addColorStop(1, 'rgba(0,0,0,0.38)');
   ctx.beginPath(); ctx.arc(CX, CY, R, 0, PI2);
   ctx.fillStyle = sh; ctx.fill();
-  // Bezel ring — makes the circle visible
+  // Clear face border so circle reads against dark panel
   ctx.save(); ctx.beginPath(); ctx.arc(CX, CY, R, 0, PI2);
-  ctx.strokeStyle = '#2e3540'; ctx.lineWidth = 3.5; ctx.stroke();
-  ctx.strokeStyle = 'rgba(255,255,255,0.07)'; ctx.lineWidth = 1; ctx.stroke();
+  ctx.strokeStyle = '#38424e'; ctx.lineWidth = 2.5; ctx.stroke();
+  ctx.strokeStyle = 'rgba(255,255,255,0.07)'; ctx.lineWidth = 0.8; ctx.stroke();
   ctx.restore();
 
   const running = S.mode === 'kørsel';
@@ -842,44 +841,44 @@ function draw(live) {
     ctx.restore();
   }
 
-  // ── CLOCK FACE: BR03-style rectangular indices ──
-  const faceEdge = OR - ORW * 0.55 - 2;  // just inside outer ring
+  // ── CLOCK FACE: Altimeter-style tick ring ON the face (R-coords) ──
+  const tickOuter = R * 0.962;
 
-  // Minute dots
+  // 1-min ticks — short thin rectangles
   for (let i = 0; i < 60; i++) {
     if (i % 5 === 0) continue;
     const a = (i / 60) * PI2 - hPI;
     ctx.save(); ctx.translate(CX, CY); ctx.rotate(a);
     ctx.beginPath();
-    ctx.rect(faceEdge - R * 0.035, -0.7, R * 0.035, 1.4);
-    ctx.fillStyle = 'rgba(255,255,255,0.22)';
+    ctx.rect(tickOuter - R * 0.038, -1.1, R * 0.038, 2.2);
+    ctx.fillStyle = 'rgba(255,255,255,0.42)';
     ctx.fill(); ctx.restore();
   }
 
-  // Hour indices — thick rectangles, wider at 12/3/6/9
+  // Hour indices — thick rectangles, extra wide at 12/3/6/9
   for (let h = 0; h < 12; h++) {
-    const a    = (h / 12) * PI2 - hPI;
-    const isQ  = h % 3 === 0;
-    const rW   = isQ ? 6.0 : 3.2;
-    const rLen = isQ ? R * 0.10 : R * 0.065;
+    const a   = (h / 12) * PI2 - hPI;
+    const isQ = h % 3 === 0;
+    const tW  = isQ ? 7.0 : 3.8;
+    const tL  = isQ ? R * 0.072 : R * 0.050;
     ctx.save(); ctx.translate(CX, CY); ctx.rotate(a);
     ctx.beginPath();
-    ctx.rect(faceEdge - rLen, -rW / 2, rLen, rW);
-    ctx.fillStyle = isQ ? '#ffffff' : 'rgba(255,255,255,0.65)';
-    if (isQ) { ctx.shadowColor = 'rgba(255,255,255,0.55)'; ctx.shadowBlur = 7; }
+    ctx.rect(tickOuter - tL, -tW / 2, tL, tW);
+    ctx.fillStyle = isQ ? '#ffffff' : 'rgba(255,255,255,0.82)';
+    if (isQ) { ctx.shadowColor = 'rgba(255,255,255,0.50)'; ctx.shadowBlur = 8; }
     ctx.fill(); ctx.shadowBlur = 0; ctx.restore();
   }
 
-  // Numbers — BR03: large at 12/3/6/9, smaller at rest, inside the indices
+  // Numbers — large, just inside tick ring, on the face
   ctx.save(); ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
   for (let h = 1; h <= 12; h++) {
-    const a     = (h / 12) * PI2 - hPI;
-    const isQ   = h % 3 === 0;
-    const nR    = faceEdge - (isQ ? R * 0.135 : R * 0.100);
-    const fSize = isQ ? Math.max(11, R * 0.115) : Math.max(7, R * 0.068);
-    ctx.font      = `900 ${fSize}px Orbitron,sans-serif`;
-    ctx.fillStyle = isQ ? '#ffffff' : 'rgba(255,255,255,0.45)';
-    if (isQ) { ctx.shadowColor = 'rgba(255,255,255,0.30)'; ctx.shadowBlur = 5; }
+    const a   = (h / 12) * PI2 - hPI;
+    const isQ = h % 3 === 0;
+    const nR  = R * (isQ ? 0.800 : 0.818);
+    const fs  = isQ ? Math.max(14, R * 0.148) : Math.max(9, R * 0.092);
+    ctx.font      = `900 ${fs}px Orbitron,sans-serif`;
+    ctx.fillStyle = isQ ? '#ffffff' : 'rgba(255,255,255,0.68)';
+    if (isQ) { ctx.shadowColor = 'rgba(255,255,255,0.30)'; ctx.shadowBlur = 6; }
     ctx.fillText(String(h), CX + Math.cos(a) * nR, CY + Math.sin(a) * nR);
     ctx.shadowBlur = 0;
   }
