@@ -926,34 +926,40 @@ function draw(live) {
   const mn = d.getMinutes() + d.getSeconds() / 60;
   const sc = d.getSeconds() + d.getMilliseconds() / 1000;
 
-  // ── Arrow hands helper ──
-  function drawHand(angle, tipR, tailR, w, color, glow, glowBlur) {
+  // ── Arrow hands helper (shaftColor + optional arrowColor) ──
+  function drawHand(angle, tipR, tailR, w, shaftColor, arrowColor, glow, glowBlur) {
     const hw = w / 2;
-    const arrLen = tipR * 0.22;
-    const arrW   = w * 1.9;
+    const arrLen   = tipR * 0.24;
+    const arrW     = w * 2.0;
     const shaftEnd = tipR - arrLen;
     ctx.save();
     ctx.translate(CX, CY); ctx.rotate(angle);
+    // Shaft
     ctx.beginPath();
     ctx.moveTo(-tailR,   hw);
     ctx.lineTo(shaftEnd, hw);
-    ctx.lineTo(shaftEnd, arrW);
-    ctx.lineTo(tipR,     0);
-    ctx.lineTo(shaftEnd, -arrW);
     ctx.lineTo(shaftEnd, -hw);
     ctx.lineTo(-tailR,   -hw);
     ctx.closePath();
+    ctx.fillStyle = shaftColor;
+    ctx.fill();
+    // Arrowhead
     if (glow) { ctx.shadowColor = glow; ctx.shadowBlur = glowBlur; }
-    ctx.fillStyle = color;
+    ctx.beginPath();
+    ctx.moveTo(shaftEnd, arrW);
+    ctx.lineTo(tipR,     0);
+    ctx.lineTo(shaftEnd, -arrW);
+    ctx.closePath();
+    ctx.fillStyle = arrowColor || shaftColor;
     ctx.fill();
     ctx.shadowBlur = 0; ctx.restore();
   }
-  // Hour — white, longer
-  drawHand(hr / 12 * PI2 - hPI, R * 0.46, R * 0.10, 7, '#ffffff', '#ddeeff', running ? 18 : 7);
-  // Minute — white, long
-  drawHand(mn / 60 * PI2 - hPI, R * 0.62, R * 0.12, 4.5, '#ddddee', '#c8d0e0', running ? 11 : 4);
-  // Second — red, longest
-  drawHand(sc / 60 * PI2 - hPI, R * 0.68, R * 0.17, 2, '#ff2200', '#ff2200', running ? 14 : 5);
+  // Hour — wit shaft, rød pil
+  drawHand(hr / 12 * PI2 - hPI, R * 0.46, R * 0.10, 7, '#ffffff', '#ff2200', '#ff4422', running ? 18 : 7);
+  // Minute — hvid shaft, gul pil
+  drawHand(mn / 60 * PI2 - hPI, R * 0.62, R * 0.12, 4.5, '#ddddee', '#ffcc00', '#ffcc00', running ? 13 : 5);
+  // Second — rød, rød pil
+  drawHand(sc / 60 * PI2 - hPI, R * 0.68, R * 0.17, 2, '#ff2200', '#ff2200', '#ff2200', running ? 14 : 5);
   // Center cap — red
   ctx.save(); ctx.beginPath(); ctx.arc(CX, CY, R * 0.038, 0, PI2);
   ctx.fillStyle = '#ff2200'; ctx.shadowColor = '#ff2200';
