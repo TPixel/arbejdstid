@@ -282,32 +282,10 @@ canvas{position:absolute;top:0;left:0;width:100%;height:100%;border-radius:50%;z
     </div>
   </div>
 
-  <!-- Live rule cells -->
-  <div class="rules-bar" id="rulesBar">
-    <div class="rule-cell" id="rcK">
-      <div class="rule-val" id="rcKv">4:30</div>
-      <div class="rule-lbl">KONT. REST</div>
-    </div>
-    <div class="rule-cell" id="rcD">
-      <div class="rule-val" id="rcDv">9:00</div>
-      <div class="rule-lbl">DAG REST</div>
-    </div>
-    <div class="rule-cell" id="rcB">
-      <div class="rule-val" id="rcBv">0:45</div>
-      <div class="rule-lbl">PAUSE BEHOV</div>
-    </div>
-  </div>
-
   <div class="status-bar">
     <div class="sb-led" id="sbL1"></div>
     <div class="sb-txt" id="sbTxt">TRYK KØRSEL ELLER ANDET FOR AT STARTE</div>
     <div class="sb-led" id="sbL2"></div>
-  </div>
-
-  <div class="legend">
-    <div class="li"><span class="ld" style="background:linear-gradient(90deg,#001030,#22aaff)"></span>Kont. kørsel (4½t)</div>
-    <div class="li"><span class="ld" style="background:linear-gradient(90deg,#001510,#00ee55)"></span>Daglig kørsel (9t)</div>
-    <div class="li"><span class="ld" style="background:#22ddcc"></span>Pause (45 min)</div>
   </div>
 </div>
 
@@ -643,25 +621,6 @@ function refreshLabels(live) {
     bEl.className = 'flabel ' + (S.breakMs >= REQ_BREAK_MS ? 'grn dim' : 'dim');
   }
 
-  // ── Rules bar ──
-  const rcKv = document.getElementById('rcKv');
-  const rcDv = document.getElementById('rcDv');
-  const rcBv = document.getElementById('rcBv');
-  const rcK  = document.getElementById('rcK');
-  const rcD  = document.getElementById('rcD');
-  const rcB  = document.getElementById('rcB');
-
-  rcKv.textContent = fmtDur(Math.max(0, MAX_CONT_MS - live.contMs));
-  rcDv.textContent = fmtDur(Math.max(0, maxD - live.dailyMs));
-
-  const bLeft = S.mode === 'pause' ? Math.max(0, REQ_BREAK_MS - live.breakMs) : REQ_BREAK_MS;
-  rcBv.textContent = S.mode === 'pause'
-    ? (live.breakMs >= REQ_BREAK_MS ? '✓ OK' : fmtDur(bLeft) + ' REST')
-    : '0:45 KRÆVET';
-
-  rcK.className  = 'rule-cell' + (live.contMs >= MAX_CONT_MS ? ' alert-cell' : live.contMs >= WARN_CONT_MS ? ' warn-cell' : '');
-  rcD.className  = 'rule-cell' + (live.dailyMs >= maxD ? ' alert-cell' : live.dailyMs >= WARN_DAILY_MS ? ' warn-cell' : '');
-  rcB.className  = 'rule-cell' + (S.mode === 'pause' && live.breakMs >= REQ_BREAK_MS ? '' : '');
 }
 
 function setLabelPos(id, angle, rPct) {
